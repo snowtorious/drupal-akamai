@@ -270,7 +270,8 @@ function _akamai_get_all_paths($url, $node = NULL) {
  * Get the email address for notification.
  */
 function akamai_get_notification_email() {
-  $notification = variable_get('akamai_email', '');
+  $akamai_config = \Drupal::config('akamai.settings');
+  $notification = $akamai_config->get('akamai_email');
   if (empty($notification)) {
     global $user;
     $notification = $user->mail;
