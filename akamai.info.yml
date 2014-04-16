@@ -1,0 +1,4 @@
+type: module
+name: Akamai
+description: 'Cache Control integration with Akamai CDN, Akamai is a registered trademark of Akamai Technologies, Inc.'
+core: 8.x
