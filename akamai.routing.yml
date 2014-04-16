@@ -1,0 +1,6 @@
+akamai.admin_settings:
+  path: '/admin/config/system/akamai'
+  defaults:
+    _form: '\Drupal\akamai\Form\SettingsForm'
+  requirements:
+    _permission: 'administer akamai'
