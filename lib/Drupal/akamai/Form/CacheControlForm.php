@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\Request;
 /**
  * Defines a form that configures Akamai settings.
  */
-class SettingsForm extends ConfigFormBase {
+class CacheControlForm extends ConfigFormBase {
 
   /**
    * {@inheritdoc}

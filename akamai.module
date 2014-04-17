@@ -274,7 +274,7 @@ function akamai_get_notification_email() {
   $notification = $akamai_config->get('email');
   if (empty($notification)) {
     global $user;
-    $notification = $user->mail;
+    $notification = \Drupal::currentUser()->getEmail();
   }
   return $notification;
 }
