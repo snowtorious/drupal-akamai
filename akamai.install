@@ -4,6 +4,7 @@
  * Implementation of hook_requirements().
  */
 function akamai_requirements($phase) {
+  $akamai_config = \Drupal::config('akamai.settings');
   $requirements = array();
 
   $requirements['SoapClient']['title'] = t('SoapClient class');
@@ -19,7 +20,7 @@ function akamai_requirements($phase) {
   }
 
   // Check is REST API is set as default, otherwise raise error
-  if (!variable_get('akamai_restapi_default', 0)) {
+  if (!$akamai_confg->get('restapi_default')) {
     $requirements['rest_default']['title'] = $t('Akamai using REST');
     $requirements['rest_default']['value'] = $t('REST not set as default method');
     $requirements['rest_default']['severity'] = REQUIREMENT_WARNING;

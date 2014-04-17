@@ -134,7 +134,7 @@ function akamai_page_cache_control_form() {
   }
 
   $path_label = $path;
-  if ($path == variable_get('site_frontpage', 'node')) {
+  if ($path == \Drupal::config('system.site')->git('page.front')) {
     $path_label = t("[frontpage]");
   }
 
@@ -256,7 +256,7 @@ function _akamai_get_all_paths($url, $node = NULL) {
   }
 
   // If this is the frontpage, add a blank to clear the root doc
-  if ($source == variable_get('site_frontpage', 'node')) {
+  if ($source == \Drupal::config('system.site')->get('page.front')) {
     $paths[] = '';
   }
 
@@ -271,7 +271,7 @@ function _akamai_get_all_paths($url, $node = NULL) {
  */
 function akamai_get_notification_email() {
   $akamai_config = \Drupal::config('akamai.settings');
-  $notification = $akamai_config->get('akamai_email');
+  $notification = $akamai_config->get('email');
   if (empty($notification)) {
     global $user;
     $notification = $user->mail;
@@ -285,7 +285,7 @@ function akamai_get_notification_email() {
  */
 function akamai_get_class($params = array()) {
   module_load_include('inc', 'akamai', 'akamai.class');
-  $class = variable_get('akamai_service_class', 'AkamaiCacheControlClient');
+  $class = \Drupal::config('akamai.settings')->get('service_class');
   $akamai = new $class($params);
   return $akamai;
 }

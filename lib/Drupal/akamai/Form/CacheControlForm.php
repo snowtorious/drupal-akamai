@@ -36,7 +36,7 @@ class SettingsForm extends ConfigFormBase {
   $form['domain_override'] = array(
     '#type'          => 'select',
     '#title'         => t('Domain'),
-    '#default_value' => $akamai_config->get('akamai_domain'),
+    '#default_value' => $akamai_config->get('domain'),
     '#options'       => array(
       'staging'    => t('Staging'),
       'production' => t('Production'),
@@ -47,7 +47,7 @@ class SettingsForm extends ConfigFormBase {
   $form['refresh'] = array(
     '#type'        => 'radios',
     '#title'       => t('Clearing Action Type'),
-    '#default_value' => $akamai_config->get('akamai_action'),
+    '#default_value' => $akamai_config->get('action'),
     '#options'     => array(
       'remove'     => t('Remove'),
       'invalidate' => t('Invalidate'),

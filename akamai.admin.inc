@@ -4,6 +4,8 @@
  * @file
  *   Akamai is a registered trademark of Akamai Technologies, Inc.
  *   Administrative pages for the Akamai module.
+ *
+ * @todo: Remove this file once functinality is confirmed in new Form controllers.
  */
 
 /**

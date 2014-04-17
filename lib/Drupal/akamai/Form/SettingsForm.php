@@ -31,35 +31,35 @@ class SettingsForm extends ConfigFormBase {
     $form['akamai_wsdl'] = array(
       '#type'          => 'textfield',
       '#title'         => t('SOAP WSDL'),
-      '#default_value' => $akamai_config->get('akamai_wsdl'),
+      '#default_value' => $akamai_config->get('wsdl'),
       '#description'   => t('The URL of the Akamai SOAP call WSDL, e.g. "https://soap.example.com/example.wsdl"')
     );
 
     $form['akamai_basepath'] = array(
       '#type'          => 'textfield',
       '#title'         => t('Base Path'),
-      '#default_value' => $akamai_config->get('akamai_basepath'),
+      '#default_value' => $akamai_config->get('basepath'),
       '#description'   => t('The URL of the base path (fully qualified domain name) of the site.  This will be used as a prefix for all cache clears (Akamai indexs on the full URI). e.g. "http://www.example.com"')
     );
 
     $form['akamai_username'] = array(
       '#type'          => 'textfield',
       '#title'         => t('Cache clearing user'),
-      '#default_value' => $akamai_config->get('akamai_username'),
+      '#default_value' => $akamai_config->get('username'),
       '#description'   => t('The user name of the account being used for cache clearing (most likely an email)')
     );
 
     $form['akamai_password'] = array(
       '#type'          => 'textfield',
       '#title'         => t('Cache clearing password'),
-      '#default_value' => $akamai_config->get('akamai_password'),
+      '#default_value' => $akamai_config->get('password'),
       '#description'   => t('The password of the cache clearing user')
     );
 
     $form['akamai_domain'] = array(
       '#type'          => 'select',
       '#title'         => t('Domain'),
-      '#default_value' => $akamai_config->get('akamai_domain'),
+      '#default_value' => $akamai_config->get('domain'),
       '#options'       => array(
         'staging'    => t('Staging'),
         'production' => t('Production'),
@@ -70,7 +70,7 @@ class SettingsForm extends ConfigFormBase {
     $form['akamai_action'] = array(
       '#type'          => 'select',
       '#title'         => t('Clearing Action Type Default'),
-      '#default_value' => $akamai_config->get('akamai_action'),
+      '#default_value' => $akamai_config->get('action'),
       '#options'       => array(
         'remove'     => t('Remove'),
         'invalidate' => t('Invalidate'),
@@ -80,7 +80,7 @@ class SettingsForm extends ConfigFormBase {
     $form['akamai_email'] = array(
       '#type'          => 'textfield',
       '#title'         => t('Email Notification Override'),
-      '#default_value' => $akamai_config->get('akamai_email'),
+      '#default_value' => $akamai_config->get('email'),
       '#description'   => t('If this email address is specified all cache clearing requests will send notifications to this address.  If this address is not specified, the email address of the user executing the request will be used.')
     );
 
