@@ -1,12 +1,12 @@
-akamai.admin_settings:
+akamai.settings:
   path: '/admin/config/system/akamai'
   defaults:
     _form: '\Drupal\akamai\Form\SettingsForm'
   requirements:
     _permission: 'administer akamai'
 
-akamai.cache_clear:
-  path: '/admin/config/system/akamai-refresh'
+akamai.refresh:
+  path: '/admin/config/system/akamai/refresh'
   defaults:
     _form: '\Drupal\akamai\Form\CacheControlForm'
   requirements:

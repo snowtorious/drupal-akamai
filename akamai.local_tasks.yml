@@ -1,0 +1,9 @@
+akamai.settings.task:
+  title: 'Settings'
+  route_name: 'akamai.settings'
+  base_route: 'akamai.settings'
+
+akamai.refresh.task:
+  title: 'Cache Control Utility'
+  route_name: 'akamai.refresh'
+  base_route: 'akamai.settings'
