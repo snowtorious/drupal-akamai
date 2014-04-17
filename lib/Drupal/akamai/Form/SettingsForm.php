@@ -35,6 +35,20 @@ class SettingsForm extends ConfigFormBase {
       '#description'   => t('The URL of the Akamai SOAP call WSDL, e.g. "https://soap.example.com/example.wsdl"')
     );
 
+    $form['akamai_restapi'] = array(
+      '#type'          => 'textfield',
+      '#title'         => t('REST API URL'),
+      '#default_value' => $akamai_config->get('restapi'),
+      '#description'   => t('The URL of the Akamai REST API call e.g. "https://api.ccu.akamai.com/ccu/v2/queues/default"')
+    );
+
+    $form['akamai_restapi_default'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Rest API default'),
+      '#default_value' => $akamai_config->get('restapi_default'),
+      '#description' => t('This option if checked uses Rest API over SOAP'),
+    );
+
     $form['akamai_basepath'] = array(
       '#type'          => 'textfield',
       '#title'         => t('Base Path'),
@@ -101,13 +115,15 @@ class SettingsForm extends ConfigFormBase {
    */
   public function submitForm(array &$form, array &$form_state) {
     $this->configFactory->get('akamai.settings')
-      ->set('akamai_wsdl', $form_state['values']['akamai_wsdl'])
-      ->set('akamai_basepath', $form_state['values']['akamai_basepath'])
-      ->set('akamai_username', $form_state['values']['akamai_username'])
-      ->set('akamai_password', $form_state['values']['akamai_password'])
-      ->set('akamai_domain', $form_state['values']['akamai_domain'])
-      ->set('akamai_action', $form_state['values']['akamai_action'])
-      ->set('akamai_email', $form_state['values']['akamai_email'])
+      ->set('wsdl', $form_state['values']['akamai_wsdl'])
+      ->set('restapi', $form_state['values']['akamai_restapi'])
+      ->set('restapi_default', $form_state['values']['akamai_restapi_default'])
+      ->set('basepath', $form_state['values']['akamai_basepath'])
+      ->set('username', $form_state['values']['akamai_username'])
+      ->set('password', $form_state['values']['akamai_password'])
+      ->set('domain', $form_state['values']['akamai_domain'])
+      ->set('action', $form_state['values']['akamai_action'])
+      ->set('email', $form_state['values']['akamai_email'])
       ->save();
   }
 }
