@@ -6,6 +6,9 @@
  *    Akamai is a registered trademark of Akamai Technologies, Inc.
  */
 
+// Use Language so that we have access to the LANGCODE_NOT_SPECIFIED constant
+use Drupal\Core\Language\Language;
+
 define("AKAMAI_EMAIL_DISABLE", '#disable#');
 
 /**ll
@@ -229,6 +232,8 @@ function akamai_clear_url($paths_in, $params = array(), $node = NULL) {
  *    The Node for the URL being cleared if one exists, NULL otherwise
  * @return
  *    An array of all paths aliased to the provided URL.
+ *
+ * @todo: seems like there should be a more abstracted means of getting the aliases; research and verify
  */
 function _akamai_get_all_paths($url, $node = NULL) {
   global $language;
@@ -244,11 +249,11 @@ function _akamai_get_all_paths($url, $node = NULL) {
   $paths[] = $source;
 
 
-  $result = db_query('SELECT alias FROM {url_alias} WHERE source = :source AND language IN (:language, :language_none)',
+  $result = db_query('SELECT alias FROM {url_alias} WHERE source = :source AND langcode IN (:language, :language_none)',
                       array(
                         ':source' => $source,
                         ':language' => isset($language->language) ? $language->language : '',
-                        ':language_none' => LANGUAGE_NONE,
+                        ':language_none' => Language::LANGCODE_NOT_SPECIFIED,
                       ));
 
   foreach ($result as $record) {
