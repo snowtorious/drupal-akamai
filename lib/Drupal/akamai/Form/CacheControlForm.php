@@ -99,7 +99,7 @@ class CacheControlForm extends FormBase {
       drupal_set_message($message);
     }
     else {
-      drupal_set_message( t("There was a problem with your cache control request.  Check your log messages for more information.", array(), 'error') );
+      drupal_set_message(t("There was a problem with your cache control request.  Check your log messages for more information."), 'error');
     }
   }
 }
