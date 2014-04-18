@@ -38,17 +38,18 @@ class AkamaiCacheControlClient implements AkamaiCacheControl {
    *                  Web Service. These will override the defaults.
    */
   function __construct($options = array()) {
+    $akamai_config = \Drupal::config('akamai_settings');
     $this->defaults =  array(
-      'basepath'  => variable_get("akamai_basepath", ""),
-      'name'      => variable_get("akamai_username", ""),
-      'pwd'       => variable_get("akamai_password", ""),
-      'action'    => variable_get("akamai_action", ""),
-      'type'      => "arl",
-      'domain'    => variable_get("akamai_domain", ""),
-      'soap_wsdl' => variable_get("akamai_wsdl", ""),
-      'restapi' => variable_get("akamai_restapi", ""),
-      'email'     => variable_get("akamai_email", ""),
-      'restapi_default'     => variable_get("akamai_restapi_default", ""),
+      'basepath'        => $akamai_config->get("basepath"),
+      'name'            => $akamai_config->get("username"),
+      'pwd'             => $akamai_config->get("password"),
+      'action'          => $akamai_config->get("action"),
+      'type'            => "arl",
+      'domain'          => $akamai_config->get("domain"),
+      'soap_wsdl'       => $akamai_config->get("wsdl"),
+      'restapi'         => $akamai_config->get("restapi"),
+      'email'           => $akamai_config->get("email"),
+      'restapi_default' => $akamai_config->get("restapi_default", ""),
     );
 
     $this->parameters = array_merge($this->defaults, $options);
