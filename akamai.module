@@ -45,7 +45,7 @@ function akamai_theme() {
  * When nodes are modified, clear URL from the Akamai
  * cache. Clear base node/% url as well as aliases.
  */
-function akamai_node_update($node) {
+function akamai_node_update(\Drupal\node\NodeInterface $node) {
   $url = base_path() . "node/{$node->nid}";
   akamai_clear_url($url, array('email' => AKAMAI_EMAIL_DISABLE), $node);
 }
@@ -56,7 +56,7 @@ function akamai_node_update($node) {
  * When nodes are modified, clear URL from the Akamai
  * cache. Clear base node/% url as well as aliases.
  */
-function akamai_node_delete($node) {
+function akamai_node_delete(\Drupal\node\NodeInterface $node) {
   $url = base_path() . "node/{$node->nid}";
   akamai_clear_url($url, array('email' => AKAMAI_EMAIL_DISABLE), $node);
 }
