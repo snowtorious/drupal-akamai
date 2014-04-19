@@ -38,7 +38,7 @@ class AkamaiCacheControlClient implements AkamaiCacheControl {
    *                  Web Service. These will override the defaults.
    */
   function __construct($options = array()) {
-    $akamai_config = \Drupal::config('akamai_settings');
+    $akamai_config = \Drupal::config('akamai.settings');
     $this->defaults =  array(
       'basepath'        => $akamai_config->get("basepath"),
       'name'            => $akamai_config->get("username"),
@@ -132,17 +132,25 @@ class AkamaiCacheControlClient implements AkamaiCacheControl {
       //url needs to be in the format of scheme://user:pass@url
       $url_parsed = parse_url($restapi);
       $url = $url_parsed['scheme'] . '://' . $name . ':' . $pwd . '@' . $url_parsed['host'] . $url_parsed['path'];
-      $response = drupal_http_request($url, array(
-          'method' => 'POST',
-          'data' => $data_string,
+      try {
+        $request = \Drupal::httpClient();
+        $request->post($url, array(
+          'body' => $data_string,
           'timeout' => 5,
           'headers' => array(
-             'Content-Type' => 'application/json',
-             'Content-Length' => strlen($data_string),
+            'Content-Type' => 'application/json',
+            'Content-Length' => strlen($data_string),
           ),
         )
-      );
-      $is_success = ($response->code < 300);
+        );
+        $response->send();
+      }
+      catch (Exception $e) {
+        watchdog('Akamai', t("Error Clearing Akamai Cache: %msg"), array('%msg' => $e->getMessage()));
+        throw $e;
+      }
+
+      $is_success = ($response->getStatusCode() < 300);
       if (!$is_success) {
         throw new Exception($response->data);
       }
