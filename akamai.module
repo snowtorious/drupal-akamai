@@ -28,40 +28,6 @@ function akamai_permission() {
 }
 
 /**
- * Implementation of hook_menu().
- */
-function akamai_menu() {
-  $items = array();
-
-  $items['admin/config/system/akamai'] = array(
-    'title' => 'Akamai',
-    'description' => 'Akamai integration settings and cache clearing utility',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('akamai_settings'),
-    'access arguments' => array('administer akamai'),
-    'file' => 'akamai.admin.inc',
-  );
-
-  $items['admin/config/system/akamai/settings'] = array(
-    'title' => 'Settings',
-    'weight' => -10,
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-  );
-
-  $items['admin/config/system/akamai/refresh'] = array(
-    'title' => 'Cache Control Utility',
-    'description' => 'Admin interface to flush Drupal resources from the Akamai cache',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('akamai_cache_control'),
-    'access arguments' => array('purge akamai cache'),
-    'file' => 'akamai.admin.inc',
-    'type' => MENU_LOCAL_TASK,
-  );
-
-  return $items;
-}
-
-/**
  * Implementation of hook_theme()
  */
 function akamai_theme() {
