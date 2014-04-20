@@ -28,6 +28,8 @@ class CacheControlBlockForm extends FormBase {
   public function buildForm(array $form, array &$form_state) {
     $akamai_config = \Drupal::config('akamai.settings');
 
+    $path = check_plain(current_path());
+
     $nid = arg(1);
   
     if (arg(0) == 'node' && is_numeric($nid) && arg(2) == NULL) {
@@ -35,7 +37,6 @@ class CacheControlBlockForm extends FormBase {
       $form['#node'] = node_load($nid);
     }
     else {
-      $path = check_plain($_GET['q']);
       $form['#node'] = NULL;
     }
   
