@@ -87,63 +87,6 @@ function akamai_block_view($delta) {
 }
 
 /**
- * Form for purging the current URL from the Akamai cache.
- */
-function akamai_page_cache_control_form() {
-  $form = array();
-  $nid = arg(1);
-
-  if (arg(0) == 'node' && is_numeric($nid) && arg(2) == NULL) {
-    $path = arg(0) . '/' . $nid;
-    $form['#node'] = node_load($nid);
-  }
-  else {
-    $path = check_plain($_GET['q']);
-    $form['#node'] = NULL;
-  }
-
-  $path_label = $path;
-  if ($path == \Drupal::config('system.site')->git('page.front')) {
-    $path_label = t("[frontpage]");
-  }
-
-  $form['path'] = array(
-    '#type'  => 'hidden',
-    '#value' => $path
-  );
-  $form['message'] = array(
-    '#type'  => 'item',
-    '#title' => t('Refresh URL'),
-    '#markup' => $path_label,
-  );
-  $form['submit'] = array(
-    '#type'  => 'submit',
-    '#value' => t('Refresh Akamai Cache'),
-  );
-
-  return $form;
-}
-
-/**
- * Submit handler for akamai_page_cache_control.
- *
- * Purge the 'path' variable from the Akamai cache.
- *
- */
-function akamai_page_cache_control_form_submit($form, &$form_state) {
-  $values = $form_state['values'];
-  $path = $values['path'];
-  $did_clear = akamai_clear_url($path, array(), $form['#node']);
-  if ($did_clear) {
-    $message = t("Akamai Cache Request has been made successfully, please allow 10 minutes for changes to take effect.");
-    drupal_set_message($message);
-  }
-  else {
-    drupal_set_message(t("There was a problem clearing the cache for this page.  Check your log messages for more information."), 'error');
-  }
-}
-
-/**
  * Clear a URL from Akamai.  Clears node/id and any url aliases.
  *
  * @param $paths_in
