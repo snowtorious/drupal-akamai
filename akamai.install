@@ -1,22 +1,38 @@
 <?php
 
 /**
- * Implementation of hook_requirements().
+ * @file
+ *
+ * Install and updates for the Akamai module.
  */
-function akamai_requirements($phase) {
-  $requirements = array(); 
-  $t = get_t();
 
-  $requirements['SoapClient']['title'] = $t('SoapClient class');
-  if ( !class_exists('SoapClient') ) {
-    $requirements['SoapClient']['value'] = $t('Not installed');
-    $requirements['SoapClient']['severity'] = REQUIREMENT_ERROR;
-    $requirements['SoapClient']['description'] = $t('The SoapClient library is not installed. Either install the php-soap extension, or otherwise make the library available to PHP.');
-  } else {
-    $requirements['SoapClient']['value'] = $t('Installed');
-    $requirements['SoapClient']['severity'] = REQUIREMENT_OK;
-  
+/**
+ * Update hook for backporting Drupal 7 module to Drupal 6.
+ */
+function akamai_update_6001() {
+  $ret = array();
+
+  $vars = array(
+    'akamai_basepath' => 'AkamaiCC_basepath',
+    'akamai_username' => 'AkamaiCC_name',
+    'akamai_password' => 'AkamaiCC_pwd',
+    'akamai_action' => 'AkamaiCC_action',
+    'akamai_domain' => 'AkamaiCC_domain',
+    'akamai_email' => 'AkamaiCC_email'
+  );
+
+  foreach ($vars as $new => $old) {
+    $ret[] = update_sql("UPDATE {variable} SET name = '$new' WHERE name = '$old'");
   }
-    
-  return $requirements;
+
+  variable_del('akamai_wsdl');
+
+  variable_set('akamai_restapi', 'https://api.ccu.akamai.com/ccu/v2/queues/default');
+
+  $ret[] = array(
+    'success' => TRUE,
+    'query' => t('Updated Akamai configuration variable names.')
+  );
+
+  return $ret;
 }
