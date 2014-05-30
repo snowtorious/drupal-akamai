@@ -26,7 +26,7 @@ class SettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, array &$form_state) {
-    $akamai_config = $this->configFactory->get('akamai.settings');
+    $akamai_config = $this->config('akamai.settings');
 
     $form['akamai_wsdl'] = array(
       '#type'          => 'textfield',
@@ -114,7 +114,7 @@ class SettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, array &$form_state) {
-    $this->configFactory->get('akamai.settings')
+    $this->config('akamai.settings')
       ->set('wsdl', $form_state['values']['akamai_wsdl'])
       ->set('restapi', $form_state['values']['akamai_restapi'])
       ->set('restapi_default', $form_state['values']['akamai_restapi_default'])
