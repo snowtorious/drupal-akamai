@@ -28,25 +28,11 @@ class SettingsForm extends ConfigFormBase {
   public function buildForm(array $form, array &$form_state) {
     $akamai_config = $this->config('akamai.settings');
 
-    $form['akamai_wsdl'] = array(
-      '#type'          => 'textfield',
-      '#title'         => t('SOAP WSDL'),
-      '#default_value' => $akamai_config->get('wsdl'),
-      '#description'   => t('The URL of the Akamai SOAP call WSDL, e.g. "https://soap.example.com/example.wsdl"')
-    );
-
     $form['akamai_restapi'] = array(
       '#type'          => 'textfield',
       '#title'         => t('REST API URL'),
-      '#default_value' => $akamai_config->get('restapi'),
+      '#default_value' => ($akamai_config->get('restapi') ? $akamai_config->get('restapi') : 'https://api.ccu.akamai.com/ccu/v2/queues/default'),
       '#description'   => t('The URL of the Akamai REST API call e.g. "https://api.ccu.akamai.com/ccu/v2/queues/default"')
-    );
-
-    $form['akamai_restapi_default'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Rest API default'),
-      '#default_value' => $akamai_config->get('restapi_default'),
-      '#description' => t('This option if checked uses Rest API over SOAP'),
     );
 
     $form['akamai_basepath'] = array(
