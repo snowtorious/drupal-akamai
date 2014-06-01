@@ -31,7 +31,7 @@ class SettingsForm extends ConfigFormBase {
     $form['akamai_restapi'] = array(
       '#type'          => 'textfield',
       '#title'         => t('REST API URL'),
-      '#default_value' => ($akamai_config->get('restapi') ? $akamai_config->get('restapi') : 'https://api.ccu.akamai.com/ccu/v2/queues/default'),
+      '#default_value' => $akamai_config->get('restapi'),
       '#description'   => t('The URL of the Akamai REST API call e.g. "https://api.ccu.akamai.com/ccu/v2/queues/default"')
     );
 
