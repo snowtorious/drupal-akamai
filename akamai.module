@@ -149,14 +149,13 @@ function _akamai_get_all_paths($url, $node = NULL) {
 
   // If it is not a node path, get the system path
   if (strpos($url, 'node') !== 0) {
-    $source = drupal_lookup_path('source', $url);
+    $source = \Drupal::service('path.alias_manager')->getPathByAlias($url);
   }
   if (!isset($source)  || !$source) {
     $source = $url;
   }
   $source = preg_replace("/^\//", "", $source);
   $paths[] = $source;
-
 
   $result = db_query('SELECT alias FROM {url_alias} WHERE source = :source AND langcode IN (:language, :language_none)',
                       array(

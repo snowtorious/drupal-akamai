@@ -8,6 +8,7 @@
 namespace Drupal\akamai\Form;
 
 use Drupal\Core\Form\FormBase;
+use Drupal\Component\Utility\Xss;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -84,7 +85,7 @@ class CacheControlForm extends FormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, array &$form_state) {
-    $paths = explode("\n", filter_xss($form_state['values']['paths']));
+    $paths = explode("\n", Xss::filter($form_state['values']['paths']));
     $action = $form_state['values']['refresh'];
 
     $overrides = array(
