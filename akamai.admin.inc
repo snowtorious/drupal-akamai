@@ -1,13 +1,13 @@
 <?php
-
 /**
  * @file
- *   Akamai is a registered trademark of Akamai Technologies, Inc.
- *   Administrative pages for the Akamai module.
+ * Akamai is a registered trademark of Akamai Technologies, Inc.
+ *
+ * Administrative pages for the Akamai module.
  */
 
 /**
- * General Settings for Akamai
+ * General Settings for Akamai.
  */
 function akamai_settings() {
   $form = array();
@@ -16,28 +16,28 @@ function akamai_settings() {
     '#type'          => 'textfield',
     '#title'         => t('REST API URL'),
     '#default_value' => variable_get('akamai_restapi', 'https://api.ccu.akamai.com/ccu/v2/queues/default'),
-    '#description'   => t('The URL of the Akamai REST API call e.g. "https://api.ccu.akamai.com/ccu/v2/queues/default"')
+    '#description'   => t('The URL of the Akamai REST API call e.g. "https://api.ccu.akamai.com/ccu/v2/queues/default"'),
   );
 
   $form['akamai_basepath'] = array(
     '#type'          => 'textfield',
     '#title'         => t('Base Path'),
     '#default_value' => variable_get('akamai_basepath', ''),
-    '#description'   => t('The URL of the base path (fully qualified domain name) of the site.  This will be used as a prefix for all cache clears (Akamai indexs on the full URI). e.g. "http://www.example.com"')
+    '#description'   => t('The URL of the base path (fully qualified domain name) of the site.  This will be used as a prefix for all cache clears (Akamai indexs on the full URI). e.g. "http://www.example.com"'),
   );
 
   $form['akamai_username'] = array(
     '#type'          => 'textfield',
     '#title'         => t('Cache clearing user'),
     '#default_value' => variable_get('akamai_username', ''),
-    '#description'   => t('The user name of the account being used for cache clearing (most likely an email)')
+    '#description'   => t('The user name of the account being used for cache clearing (most likely an email)'),
   );
 
   $form['akamai_password'] = array(
     '#type'          => 'textfield',
     '#title'         => t('Cache clearing password'),
     '#default_value' => variable_get('akamai_password', ''),
-    '#description'   => t('The password of the cache clearing user')
+    '#description'   => t('The password of the cache clearing user'),
   );
 
   $form['akamai_domain'] = array(
@@ -48,7 +48,7 @@ function akamai_settings() {
       'staging'    => t('Staging'),
       'production' => t('Production'),
     ),
-    '#description'   => t('The Akamai domain to use for cache clearing')
+    '#description'   => t('The Akamai domain to use for cache clearing'),
   );
 
   $form['akamai_action'] = array(
@@ -59,13 +59,13 @@ function akamai_settings() {
       'remove'     => t('Remove'),
       'invalidate' => t('Invalidate'),
     ),
-    '#description'   => t('The default clearing action.  The options are <em>remove</em> (which removes the item from the Akamai cache) and <em>invalidate</em> (which leaves the item in the cache, but invalidates it so that the origin will be hit on the next request)')
+    '#description'   => t('The default clearing action.  The options are <em>remove</em> (which removes the item from the Akamai cache) and <em>invalidate</em> (which leaves the item in the cache, but invalidates it so that the origin will be hit on the next request)'),
   );
   $form['akamai_email'] = array(
     '#type'          => 'textfield',
     '#title'         => t('Email Notification Override'),
     '#default_value' => variable_get('akamai_email', ''),
-    '#description'   => t('If this email address is specified all cache clearing requests will send notifications to this address.  If this address is not specified, the email address of the user executing the request will be used.')
+    '#description'   => t('If this email address is specified all cache clearing requests will send notifications to this address.  If this address is not specified, the email address of the user executing the request will be used.'),
   );
   return system_settings_form($form);
 
@@ -90,7 +90,7 @@ function akamai_cache_control() {
       'staging'    => t('Staging'),
       'production' => t('Production'),
     ),
-    '#description'   => t('The Akamai domain to use for cache clearing.  Defaults to the Domain setting from the settings page.')
+    '#description'   => t('The Akamai domain to use for cache clearing.  Defaults to the Domain setting from the settings page.'),
   );
 
   $form['refresh'] = array(
@@ -109,7 +109,7 @@ function akamai_cache_control() {
     '#type'          => 'textfield',
     '#title'         => t('Email Notification'),
     '#default_value' => $default_email,
-    '#description'   => t('Email address to be used for cache clear notifications. Note that it can take up to 10 minutes or more to receive a notification.')
+    '#description'   => t('Email address to be used for cache clear notifications. Note that it can take up to 10 minutes or more to receive a notification.'),
   );
   $form['submit'] = array(
     '#type'  => 'submit',
@@ -118,7 +118,6 @@ function akamai_cache_control() {
 
   return $form;
 }
-
 
 /**
  * Submit handler for akamai_cache_control().
@@ -141,7 +140,6 @@ function akamai_cache_control_submit($form, &$form_state) {
     drupal_set_message($message);
   }
   else {
-    drupal_set_message( t("There was a problem with your cache control request.  Check the !watchdog messages for more information.", array('!watchdog' => l("watchdog", "admin/reports/dblog") ), 'error') );
+    drupal_set_message(t("There was a problem with your cache control request.  Check the !watchdog messages for more information.", array('!watchdog' => l(t("watchdog"), "admin/reports/dblog")), 'error'));
   }
 }
-

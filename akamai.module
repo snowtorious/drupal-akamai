@@ -1,15 +1,15 @@
 <?php
 /**
- * @file akamai.module
- *    Integration with the Akamai CDN Cache Control Web Service.
+ * @file
+ * Integration with the Akamai CDN Cache Control Web Service.
  *
- *    Akamai is a registered trademark of Akamai Technologies, Inc.
+ * Akamai is a registered trademark of Akamai Technologies, Inc.
  */
 
 define("AKAMAI_EMAIL_DISABLE", '#disable#');
 
 /**
- * Implementation of hook_perm().
+ * Implements hook_perm().
  */
 function akamai_perm() {
   return array(
@@ -19,7 +19,7 @@ function akamai_perm() {
 }
 
 /**
- * Implementation of hook_menu().
+ * Implements hook_menu().
  */
 function akamai_menu() {
   $items = array();
@@ -52,7 +52,7 @@ function akamai_menu() {
 }
 
 /**
- * Implementation of hook_theme()
+ * Implements hook_theme().
  */
 function akamai_theme() {
   return array(
@@ -64,7 +64,7 @@ function akamai_theme() {
 }
 
 /**
- * Implementation of hook_nodeapi().
+ * Implements hook_nodeapi().
  *
  * When nodes are modified, clear URL from the Akamai
  * cache. Clear base node/% url as well as aliases.
@@ -82,7 +82,7 @@ function akamai_nodeapi(&$node, $op) {
 
 
 /**
- * Implementation of hook_block().
+ * Implements hook_block().
  */
 function akamai_block($op = 'list', $delta = 0, $edit = array()) {
   if ($op == 'list') {
@@ -128,7 +128,7 @@ function akamai_page_cache_control_form() {
 
   $form['path'] = array(
     '#type'  => 'hidden',
-    '#value' => $path
+    '#value' => $path,
   );
   $form['message'] = array(
     '#type'  => 'item',
@@ -147,7 +147,6 @@ function akamai_page_cache_control_form() {
  * Submit handler for akamai_page_cache_control.
  *
  * Purge the 'path' variable from the Akamai cache.
- *
  */
 function akamai_page_cache_control_form_submit($form, &$form_state) {
   $values = $form_state['values'];
@@ -158,33 +157,35 @@ function akamai_page_cache_control_form_submit($form, &$form_state) {
     drupal_set_message($message);
   }
   else {
-    drupal_set_message(t("There was a problem clearing the cache for this page.  Check the !watchdog messages for more information.", array('!watchdog' => l("watchdog", "admin/reports/dblog")), 'error') );
+    drupal_set_message(t("There was a problem clearing the cache for this page.  Check the !watchdog messages for more information.", array('!watchdog' => l(t("watchdog"), "admin/reports/dblog")), 'error'));
   }
 }
 
 /**
  * Clear a URL from Akamai.  Clears node/id and any url aliases.
  *
- * @param $paths_in
- *    a array of paths or single path to clear
- * @param $params
- *   an array of params for the API call
- * @return
- *    TRUE if it was successfully cleared, FALSE otherwise.
+ * @param array $paths_in
+ *   A array of paths or single path to clear
+ *
+ * @param array $params
+ *   An array of params for the API call
+ *
+ * @return bool
+ *   TRUE if it was successfully cleared, FALSE otherwise.
  */
 function akamai_clear_url($paths_in, $params = array(), $node = NULL) {
   if (!is_array($paths_in)) {
     $paths_in = array($paths_in);
   }
-  // Get the system path and all aliases to this url
+  // Get the system path and all aliases to this url.
   $paths = array();
 
   foreach ($paths_in as $path) {
     $paths = array_merge($paths, _akamai_get_all_paths($path, $node));
   }
 
-  // It is possible to have no paths at this point if other modules have
-  // altered the paths
+  // It is possible to have no paths at this point if other modules have altered
+  // the paths.
   if (empty($paths)) {
     watchdog('akamai', 'No resultant paths to clear for %paths', array('%paths' => implode(', ', $paths_in)), WATCHDOG_NOTICE);
     return FALSE;
@@ -192,7 +193,7 @@ function akamai_clear_url($paths_in, $params = array(), $node = NULL) {
 
   $paths = array_unique($paths);
 
-  // Setup the notification email if an email address is not provided
+  // Setup the notification email if an email address is not provided.
   if (!array_key_exists('email', $params) || empty($params['email'])) {
     $params['email'] = akamai_get_notification_email();
   }
@@ -211,17 +212,19 @@ function akamai_clear_url($paths_in, $params = array(), $node = NULL) {
 /**
  * Return all system and alias paths for the provided URL.
  *
- * @param $url
- *    The URL to find all aliases
- * @param $node
- *    The Node for the URL being cleared if one exists, NULL otherwise
- * @return
- *    An array of all paths aliased to the provided URL.
+ * @param string $url
+ *   The URL to find all aliases
+ *
+ * @param int $node
+ *   The Node for the URL being cleared if one exists, NULL otherwise
+ *
+ * @return array
+ *   An array of all paths aliased to the provided URL.
  */
 function _akamai_get_all_paths($url, $node = NULL) {
   global $language;
 
-  // If it is not a node path, get the system path
+  // If it is not a node path, get the system path.
   if (strpos($url, 'node') !== 0) {
     $src = drupal_lookup_path('source', $url);
   }
@@ -237,7 +240,7 @@ function _akamai_get_all_paths($url, $node = NULL) {
     $paths[] = $alias;
   }
 
-  // Allow other modules to add/modify paths to be cleared
+  // Allow other modules to add/modify paths to be cleared.
   drupal_alter('akamai_paths', $paths, $node);
 
   return $paths;
@@ -256,9 +259,11 @@ function akamai_get_notification_email() {
 }
 
 /**
- * Implementation of hook_context_http_header_def()
- * from context_http_header module
+ * Implements hook_context_http_header_def().
+ *
  * These are the form items that display for the http header context reaction.
+ *
+ * @source: context_http_header module
  */
 function akamai_context_http_header_def() {
   return array(
@@ -274,7 +279,7 @@ function akamai_context_http_header_def() {
       '#options'       => array(
         FALSE  => t('Not Specified'),
         'on'   => t('On'),
-        'off'  => t('Off')
+        'off'  => t('Off'),
       ),
     ),
     'akamai_bypass_cache' => array(
@@ -284,7 +289,7 @@ function akamai_context_http_header_def() {
       '#options'       => array(
         FALSE  => t('Not Specified'),
         'on'   => t('On'),
-        'off'  => t('Off')
+        'off'  => t('Off'),
       ),
     ),
     'akamai_dynamic_content_assembly' => array(
@@ -303,20 +308,16 @@ function akamai_context_http_header_def() {
 }
 
 /**
- * @param $http_header_items
+ * Implements hook_http_header_build().
  *
- * Implemantation of hook_http_header_build
- * from context_http_header module
- * build the akamai edge control headers
- * array(
- *    'header-1' => array('value1', 'value2', etc),
- *    'header-2' => array(...),
- * )
+ * Build the akamai edge control headers.
+ *
+ * @source: context_http_header module
  */
 function akamai_context_http_header_build($http_header_items) {
   $header_builds = array();
   if ($value = $http_header_items['akamai_ttl']) {
-    $header_builds["Edge-Control"][] = "Cache-maxage=". check_plain($value);
+    $header_builds["Edge-Control"][] = "Cache-maxage=" . check_plain($value);
   }
 
   if ($value = $http_header_items['akamai_nostore']) {
@@ -342,7 +343,7 @@ function akamai_context_http_header_build($http_header_items) {
       $header_builds["Edge-Control"][] = "dca=noop";
     }
     if ($value == 'esi') {
-      $header_builds["Edge-Control"][] ="dca=esi";
+      $header_builds["Edge-Control"][] = "dca=esi";
     }
     if ($value == 'akamaizer') {
       $header_builds["Edge-Control"][] = "dca=akamaizer";
@@ -353,8 +354,10 @@ function akamai_context_http_header_build($http_header_items) {
 }
 
 /**
- * Returns the Akamai Cache Control class. This is abstracted to provide the capability
- * of a no-op or recording class for testing purposes.
+ * Returns the Akamai Cache Control class.
+ *
+ * This is abstracted to provide the capability of a no-op or recording class
+ * for testing purposes.
  */
 function akamai_get_class($params = array()) {
   module_load_include('inc', 'akamai', 'akamai.class');

@@ -1,8 +1,6 @@
 <?php
-
 /**
  * @file
- *
  * Install and updates for the Akamai module.
  */
 
@@ -18,7 +16,7 @@ function akamai_update_6001() {
     'akamai_password' => 'AkamaiCC_pwd',
     'akamai_action' => 'AkamaiCC_action',
     'akamai_domain' => 'AkamaiCC_domain',
-    'akamai_email' => 'AkamaiCC_email'
+    'akamai_email' => 'AkamaiCC_email',
   );
 
   foreach ($vars as $new => $old) {
@@ -31,7 +29,7 @@ function akamai_update_6001() {
 
   $ret[] = array(
     'success' => TRUE,
-    'query' => t('Updated Akamai configuration variable names.')
+    'query' => t('Updated Akamai configuration variable names.'),
   );
 
   return $ret;

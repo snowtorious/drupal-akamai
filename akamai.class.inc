@@ -1,20 +1,23 @@
 <?php
 /**
- * @file akamai.class.inc
- *    Akamai is a registered trademark of Akamai Technologies, Inc.
- *    This class is an abstraction around the Akamai Cache Control API.
+ * @file
+ * akamai.class.inc
+ *
+ * Akamai is a registered trademark of Akamai Technologies, Inc.
+ * This class is an abstraction around the Akamai Cache Control API.
  */
 
 interface AkamaiCacheControl {
   /**
    * Clears the provided URLs from the Akamai Content Cache.
    *
-   * @param $paths
-   *    A path (or array of paths) to clear from Akamai
-   * @return
-   *    An array with 2 keys:
-   *       success: TRUE or FALSE indicating cache clearing success
-   *       message: Blank if successful, the error message if not successful.
+   * @param array $paths
+   *   A path (or array of paths) to clear from Akamai
+   *
+   * @return array
+   *   An array with 2 keys:
+   *     success: TRUE or FALSE indicating cache clearing success
+   *     message: Blank if successful, the error message if not successful.
    */
   function clear_url($paths);
 }
@@ -23,22 +26,23 @@ interface AkamaiCacheControl {
  * Default implementation of the AkamaiCacheControl interface
  */
 class AkamaiCacheControlClient implements AkamaiCacheControl {
-
-  private $defaults; //akamai_get_defaults();
+  // akamai_get_defaults();
+  private $defaults;
 
   public $parameters;
 
   /**
    * Constructs an instance of the Akamai Cache Control facade.
    *
-   * Valid parameters are specified in the options array as key/value pairs with the
-   * parameter name being the key and the parameter setting being the value
+   * Valid parameters are specified in the options array as key/value pairs with
+   * the parameter name being the key and the parameter setting being the value
    *
-   * @param options  An array of parameter options for the Akamae Cache Control
-   *                  Web Service. These will override the defaults.
+   * @param array $options
+   *   An array of parameter options for the Akamae Cache Control Web Service.
+   *   These will override the defaults.
    */
   function __construct($options = array()) {
-    $this->defaults =  array(
+    $this->defaults = array(
       'basepath'  => variable_get("akamai_basepath", ""),
       'name'      => variable_get("akamai_username", ""),
       'pwd'       => variable_get("akamai_password", ""),
@@ -55,27 +59,28 @@ class AkamaiCacheControlClient implements AkamaiCacheControl {
   /**
    * Clears the provided URLs from the Akamai Content Cache.
    *
-   * @param $paths
-   *    A path (or array of paths) to clear from Akamai
-   * @return
-   *    An array with 2 keys:
-   *       success: TRUE or FALSE indicating cache clearing success
-   *       message: Blank if successful, the error message if not successful.
+   * @param array $paths
+   *   A path (or array of paths) to clear from Akamai
+   *
+   * @return array
+   *   An array with 2 keys:
+   *     success: TRUE or FALSE indicating cache clearing success
+   *     message: Blank if successful, the error message if not successful.
    */
   function clear_url($paths) {
 
-    // Grab params
+    // Grab paramaters.
     extract($this->parameters);
 
-    // make paths an array
+    // Make sure $paths is an array.
     if (!is_array($paths)) {
       $url = array($paths);
     }
 
-    // prepend base path to paths to make URIs
+    // Prepend base path to paths to make URIs.
     $uris = array();
     foreach ($paths as $path) {
-      $path= rtrim(preg_match("/^\//", $path) ? $path : "/$path");
+      $path = rtrim(preg_match("/^\//", $path) ? $path : "/$path");
       array_push($uris, $basepath . $path);
     }
 
@@ -89,17 +94,22 @@ class AkamaiCacheControlClient implements AkamaiCacheControl {
       $opt[] = "email-notification=$email";
     }
 
-    $data = array("type" => "arl", "action" => "$action", "domain" => "$domain", "objects" => $uris);
+    $data = array(
+      "type" => "arl",
+      "action" => "$action",
+      "domain" => "$domain",
+      "objects" => $uris,
+    );
     $data_string = json_encode($data);
     $data_string = str_replace("\\/", '/', $data_string);
 
-    //url needs to be in the format of scheme://user:pass@url
+    // URL needs to be in the format of scheme://user:pass@url.
     $url_parsed = parse_url($restapi);
     $url = $url_parsed['scheme'] . '://' . $name . ':' . $pwd . '@' . $url_parsed['host'] . $url_parsed['path'];
 
     $headers = array(
-       'Content-Type' => 'application/json',
-       'Content-Length' => strlen($data_string),
+      'Content-Type' => 'application/json',
+      'Content-Length' => strlen($data_string),
     );
 
     $response = drupal_http_request($url, $headers, 'POST', $data_string, 3, 5);
@@ -110,14 +120,20 @@ class AkamaiCacheControlClient implements AkamaiCacheControl {
     }
     $response_data = json_decode($response->data);
 
-    watchdog('Akamai', t("Akamai RestAPI %action for %uris: Response: %response"), array('%uris' => implode(' ', $uris), '%action' => $action, '%response' => $response_data->detail), WATCHDOG_NOTICE);
+    watchdog('Akamai', "Akamai RestAPI %action for %uris: Response: %response", array(
+      '%uris' => implode(' ', $uris),
+      '%action' => $action,
+      '%response' => $response_data->detail),
+    WATCHDOG_NOTICE);
 
     return $response;
   }
 }
 
 /**
- * Implementation of the AkamaiCacheControl interface that records what was sent to it.
+ * Implementation of the AkamaiCacheControl interface that records what was sent
+ * to it.
+ *
  * Hint: This is only useful for testing.
  */
 class RecordingCacheControlClient implements AkamaiCacheControl {
