@@ -203,7 +203,7 @@ function akamai_page_cache_control_form_submit($form, &$form_state) {
 }
 
 /**
- * Clear a URL from Akamai. Clears node/id and any URL aliases.
+ * Clear one or more paths from Akamai. Clears node/id and any URL aliases.
  *
  * @param array $paths_in
  *   An array of paths or single path to clear.
@@ -212,8 +212,8 @@ function akamai_page_cache_control_form_submit($form, &$form_state) {
  * @param object $node
  *   (optional)
  *
- * @return bool
- *    TRUE if it was successfully cleared, FALSE otherwise.
+ * @return mixed
+ *   A response object if the purge request was accepted, FALSE otherwise.
  */
 function akamai_clear_url($paths_in, $params = array(), $node = NULL) {
   if (variable_get('akamai_disabled', FALSE)) {
@@ -240,11 +240,38 @@ function akamai_clear_url($paths_in, $params = array(), $node = NULL) {
 
   $paths = array_unique($paths);
 
+  // Normalize all paths so that they all begin with a '/'.
+  foreach ($paths as $key => $path) {
+    $paths[$key] = rtrim(preg_match("/^\//", $path) ? $path : "/$path");
+  }
+
+  $default_params =  array(
+    'basepath'  => variable_get("akamai_basepath", $GLOBALS['base_url']),
+    'action'    => variable_get("akamai_action", "invalidate"),
+    'domain'    => variable_get("akamai_domain", ""),
+  );
+
+  $params = array_merge($default_params, $params);
+  if (!empty($params['basepath'])) {
+    $parsed = parse_url($params['basepath']);
+    $hostname = empty($parsed['host']) ? NULL : $parsed['host'];
+  }
+
+  $version = variable_get('akamai_ccu_version', 'v3');
+
   try {
-    $akamai = akamai_get_class($params);
-    $response = $akamai->clear_url($paths);
-    if (is_object($response)) {
-      $response->client = $akamai;
+    $client = akamai_get_client($version);
+
+    if (!empty($params['domain'])) {
+      $client->setNetwork($params['domain']);
+    }
+
+    // v2 of the API uses 'remove', but v3 uses 'delete'.
+    if ($params['action'] == 'remove' || $params['action'] == 'delete') {
+      $response = $client->deleteUrls($hostname, $paths);
+    }
+    else {
+      $response = $client->invalidateUrls($hostname, $paths);
     }
     return $response;
   }
@@ -299,6 +326,39 @@ function _akamai_get_all_paths($url, $node = NULL) {
   drupal_alter('akamai_paths', $paths, $node);
 
   return $paths;
+}
+
+/**
+ * Gets an instance of a CCU client class.
+ *
+ * @param string $version
+ *   Specifies which version of the CCU API to use. Either 'v2' or 'v3'.
+ */
+function akamai_get_client($version = 'v3') {
+  if (variable_get('akamai_use_edgerc', FALSE)) {
+    $edgegrid_client = new \Akamai\Open\EdgeGrid\Client([
+      'base_uri' => variable_get('akamai_base_uri', ''),
+    ]);
+
+    $client_token = variable_get('akamai_client_token', '');
+    $client_secret = variable_get('akamai_client_secret', '');
+    $access_token = variable_get('akamai_access_token', '');
+    $edgegrid_client->setAuth($client_token, $client_secret, $access_token);
+  }
+  else {
+    $section = variable_get('akamai_edgerc_section', 'ccu');
+    $path = variable_get('akamai_edgerc_path', NULL);
+    $edgegrid_client = \Akamai\Open\EdgeGrid\Client::createFromEdgeRcFile($section, $path);
+  }
+
+  if ($version == 'v2') {
+    $ccu_client = new \Drupal\akamai\Ccu2Client($edgegrid_client);
+  }
+  else {
+    $ccu_client = new \Drupal\akamai\Ccu3Client($edgegrid_client);
+  }
+
+  return $ccu_client;
 }
 
 /**

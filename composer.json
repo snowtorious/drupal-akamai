@@ -1,0 +1,5 @@
+{
+    "require": {
+        "akamai-open/edgegrid-client": "0.4.x"
+    }
+}
