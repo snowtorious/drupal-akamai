@@ -1,14 +1,10 @@
 
 # Akamai module for Drupal
 
-Akamai is a registered trademark of Akamai Technologies, Inc.
-
 ## Installation
 
 * Unpack the akamai folder and contents in the appropriate modules directory of your Drupal installation, normally `sites/all/modules/`.
-
 * Enable the akamai module on the Modules admin page at `admin/build/modules`.
-
 * You will also need a license to use Akamai's network, http://www.akamai.com/index.html.
 
 ## Setup
@@ -30,15 +26,10 @@ For instructions on generating a `.edgerc` file, see https://developer.akamai.co
 ## Usage
 
 The module allows two forms of interaction for clearing the cache.
-1. Block form :
-  Enable this on the admin/build/block section of the admin UI and
-  put the block where you want.  This form will clear the path that is
-  listed above the button, (likely the page you are currently viewing).
-
+1. Block form:
+  Enable this on the admin/build/block section of the admin UI and put the block where you want. This form will clear the path that is listed above the button, (likely the page you are currently viewing).
 2. Refresh Tool tab:
-  The Refresh Tool tab is found at, admin/settings/akamai/refresh.  It is
-  part of the admin interface for this module.  From here you can list
-  several paths to be cleared.
+  The Refresh Tool tab is found at, admin/settings/akamai/refresh. It is part of the admin interface for this module. From here you can list several paths to be cleared.
 
 The Akamai module also offers integration with Context through the context_http_header module.
 
@@ -47,9 +38,11 @@ The Akamai module also offers integration with Context through the context_http_
 Occasionally when one path is cleared, others will need to be cleared
 as well. To enable this, we have an alter hook you can implement.
 
+```
 function HOOK_akamai_paths_alter(&$paths, $node)
+```
 
- * $paths An array of URL paths to be submitted to Akamai for clearing, this
+ * `$paths` An array of URL paths to be submitted to Akamai for clearing, this
           array can be modified.
- * $node If this is a node page you are viewing, this will be that node, otherwise
+ * `$node` If this is a node page you are viewing, this will be that node, otherwise
          it will be NULL.
