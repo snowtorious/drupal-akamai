@@ -190,7 +190,7 @@ function akamai_settings_validate_credential_field(&$element, &$form_state, $for
   }
   elseif (!$is_required) {
     // This storage method is not being used, so set value back to the default.
-    form_set_value($element, $element['#default'], $form_state);
+    form_set_value($element, $element['#default_value'], $form_state);
   }
 }
 
@@ -198,7 +198,7 @@ function akamai_settings_validate_credential_field(&$element, &$form_state, $for
  * Sets an error if the form element's value is not a valid absolute URL.
  */
 function akamai_settings_validate_url($element, &$form_state, $form) {
-  $url = form_state['values'][$element['#name']];
+  $url = $form_state['values'][$element['#name']];
   if (!empty($url) && !valid_url($element['#value'], TRUE)) {
     form_error($element, t('The !name field must be a valid, absolute URL.', array('!name' => $element['#title'])));
   }
