@@ -335,7 +335,7 @@ function _akamai_get_all_paths($url, $node = NULL) {
  *   Specifies which version of the CCU API to use. Either 'v2' or 'v3'.
  */
 function akamai_get_client($version = 'v3') {
-  if (variable_get('akamai_use_edgerc', FALSE)) {
+  if (variable_get('akamai_credential_storage', 'database') == 'database') {
     $edgegrid_client = new \Akamai\Open\EdgeGrid\Client([
       'base_uri' => variable_get('akamai_base_uri', ''),
     ]);
@@ -346,7 +346,7 @@ function akamai_get_client($version = 'v3') {
     $edgegrid_client->setAuth($client_token, $client_secret, $access_token);
   }
   else {
-    $section = variable_get('akamai_edgerc_section', 'ccu');
+    $section = variable_get('akamai_edgerc_section', 'default');
     $path = variable_get('akamai_edgerc_path', NULL);
     $edgegrid_client = \Akamai\Open\EdgeGrid\Client::createFromEdgeRcFile($section, $path);
   }

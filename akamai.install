@@ -42,4 +42,11 @@ function akamai_uninstall() {
   variable_del('akamai_timeout');
   variable_del('akamai_username');
   variable_del('akamai_disabled');
+  variable_del('akamai_credential_storage');
+  variable_del('akamai_base_uri');
+  variable_del('akamai_access_token');
+  variable_del('akamai_client_token');
+  variable_del('akamai_client_secret');
+  variable_del('akamai_edgerc_path');
+  variable_del('akamai_edgerc_section');
 }

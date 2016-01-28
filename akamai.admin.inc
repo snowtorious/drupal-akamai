@@ -24,57 +24,130 @@ function akamai_settings() {
     '#default_value' => variable_get('akamai_disabled', FALSE),
   );
 
-  $form['akamai_restapi'] = array(
-    '#type'          => 'textfield',
-    '#title'         => t('REST API URL'),
-    '#default_value' => variable_get('akamai_restapi', 'https://api.ccu.akamai.com/ccu/v2/queues/default'),
-    '#description'   => t('The URL of the Akamai REST API call e.g. "https://api.ccu.akamai.com/ccu/v2/queues/default"'),
+  $form['credentials'] = array(
+    '#type' => 'fieldset',
+    '#collapsible' => TRUE,
+    '#title' => t('API Credentials'),
+    '#description' => t('Instructions for obtaining credentials are available at !url.', array('!url' => l('https://developer.akamai.com/introduction/Prov_Creds.html', 'https://developer.akamai.com/introduction/Prov_Creds.html'))),
+  );
+  $form['credentials']['akamai_credential_storage'] = array(
+    '#type'          => 'radios',
+    '#title'         => t('Credential storage method'),
+    '#default_value' => variable_get('akamai_credential_storage', 'database'),
+    '#options'       => array(
+      'database' => t('Database'),
+      'file'     => t('.edgerc file'),
+    ),
     '#required'      => TRUE,
+    '#description' => t('Credentials may be stored in the database or in a file. See the README file for more information.')
+  );
+
+  $database_field_states = array(
+    'required' => array(
+      ':input[name="akamai_credential_storage"]' => array('value' => 'database'),
+    ),
+    'visible' => array(
+      ':input[name="akamai_credential_storage"]' => array('value' => 'database'),
+    ),
+    'optional' => array(
+      ':input[name="akamai_credential_storage"]' => array('value' => 'file'),
+    ),
+    'invisible' => array(
+      ':input[name="akamai_credential_storage"]' => array('value' => 'file'),
+    ),
+  );
+  $file_field_states = array(
+    'required' => array(
+      ':input[name="akamai_credential_storage"]' => array('value' => 'file'),
+    ),
+    'visible' => array(
+      ':input[name="akamai_credential_storage"]' => array('value' => 'file'),
+    ),
+    'optional' => array(
+      ':input[name="akamai_credential_storage"]' => array('value' => 'database'),
+    ),
+    'invisible' => array(
+      ':input[name="akamai_credential_storage"]' => array('value' => 'database'),
+    ),
+  );
+  $form['credentials']['akamai_base_uri'] = array(
+    '#type'          => 'textfield',
+    '#title'         => t('Base URL'),
+    '#default_value' => variable_get('akamai_base_uri', ''),
+    '#description'   => t('Should be in for format of %uri', array('%uri' => 'https://akaa-xxxxxxxxxxxxxxxx-xxxxxxxxxxxxxxxx.luna.akamaiapis.net/')),
+    '#states' => $database_field_states,
+    '#element_validate' => array(
+      'akamai_settings_validate_credential_field',
+      'akamai_settings_validate_url',
+    ),
+    '#akamai_credential_type' => 'database',
+  );
+  $form['credentials']['akamai_access_token'] = array(
+    '#type'          => 'textfield',
+    '#title'         => t('Access token'),
+    '#default_value' => variable_get('akamai_access_token', ''),
+    '#description'   => t('Should be in for format of %token', array('%token' => 'akab-xxxxxxxxxxxxxxxx-xxxxxxxxxxxxxxxx')),
+    '#states' => $database_field_states,
+    '#element_validate' => array('akamai_settings_validate_credential_field'),
+    '#akamai_credential_type' => 'database',
+  );
+  $form['credentials']['akamai_client_token'] = array(
+    '#type'          => 'textfield',
+    '#title'         => t('Client token'),
+    '#default_value' => variable_get('akamai_client_token', ''),
+    '#description'   => t('Should be in for format of %token', array('%token' => 'akab-xxxxxxxxxxxxxxxx-xxxxxxxxxxxxxxxx')),
+    '#states' => $database_field_states,
+    '#element_validate' => array('akamai_settings_validate_credential_field'),
+    '#akamai_credential_type' => 'database',
+  );
+  $form['credentials']['akamai_client_secret'] = array(
+    '#type'          => 'textfield',
+    '#title'         => t('Client secret'),
+    '#default_value' => variable_get('akamai_client_secret', ''),
+    '#states' => $database_field_states,
+    '#element_validate' => array('akamai_settings_validate_credential_field'),
+    '#akamai_credential_type' => 'database',
+  );
+  $form['credentials']['akamai_edgerc_path'] = array(
+    '#type'          => 'textfield',
+    '#title'         => t('Path to .edgerc file'),
+    '#default_value' => variable_get('akamai_edgerc_path', ''),
+    '#states' => $file_field_states,
+    '#element_validate' => array(
+      'akamai_settings_validate_credential_field',
+      'akamai_settings_validate_file_exists',
+      'akamai_settings_validate_file_is_readable',
+    ),
+    '#akamai_credential_type' => 'file',
+  );
+  $form['credentials']['akamai_edgerc_section'] = array(
+    '#type'          => 'textfield',
+    '#title'         => t('Section of .edgerc file to use for the CCU API'),
+    '#default_value' => variable_get('akamai_edgerc_section', 'default'),
+    '#states' => $file_field_states,
+    '#element_validate' => array('akamai_settings_validate_credential_field'),
+    '#akamai_credential_type' => 'file',
   );
 
   $form['akamai_basepath'] = array(
     '#type'          => 'textfield',
-    '#title'         => t('Base Path'),
+    '#title'         => t('Base path'),
     '#default_value' => variable_get('akamai_basepath', ''),
     '#description'   => t('The URL of the base path (fully qualified domain name) of the site.  This will be used as a prefix for all cache clears (Akamai indexs on the full URI). e.g. "http://www.example.com"'),
     '#required'      => TRUE,
+    '#element_validate' => array(
+      'akamai_settings_validate_url',
+    ),
   );
 
   $form['akamai_timeout'] = array(
     '#type'          => 'textfield',
-    '#title'         => t('Timeout Length'),
+    '#title'         => t('Timeout length'),
     '#description'   => t("The timeout used by when sending the cache clear request to Akamai's servers. Most users will not need to change this value."),
     '#size'          => 5,
     '#maxlength'     => 3,
     '#default_value' => variable_get('akamai_timeout', '5'),
     '#required'      => TRUE,
-  );
-
-  $form['akamai_username'] = array(
-    '#type'          => 'textfield',
-    '#title'         => t('Cache clearing user'),
-    '#default_value' => variable_get('akamai_username', ''),
-    '#description'   => t('The user name of the account being used for cache clearing (most likely an email)'),
-    '#required'      => TRUE,
-  );
-
-  if (variable_get('akamai_password', '')) {
-    $password_status_text = t('Akamai CCU Password is set.  Use the fields below to change or leave blank to use the existing password.');
-  }
-  else {
-    $password_status_text = t('Your Akamai CCU Password is not set.  Please set it using the fields below.');
-  }
-
-  $form['password_fieldset'] = array(
-    '#type' => 'fieldset',
-    '#title' => 'Akamai CCU Password',
-    '#description' => $password_status_text,
-  );
-
-  $form['password_fieldset']['akamai_password'] = array(
-    '#type'          => 'password_confirm',
-    '#title'         => t('Cache clearing password'),
-    '#description'   => t('The password of the cache clearing user')
   );
 
   $form['akamai_domain'] = array(
@@ -91,7 +164,7 @@ function akamai_settings() {
 
   $form['akamai_action'] = array(
     '#type'          => 'select',
-    '#title'         => t('Clearing Action Type Default'),
+    '#title'         => t('Clearing action type default'),
     '#default_value' => variable_get('akamai_action', 'remove'),
     '#options'       => array(
       'remove'     => t('Remove'),
@@ -105,21 +178,66 @@ function akamai_settings() {
 }
 
 /**
- * Validate the akamai_settings form.
- *
+ * Sets an error if required credential fields are not filled in.
  */
-function akamai_settings_validate($form, &$form_state) {
-  // verify restapi and basepath are valid absolute URLs
-  foreach (array('akamai_basepath' => 'Base Path', 'akamai_restapi' => 'REST API URL') as $field => $field_title) {
-    if (!valid_url($form_state['values'][$field], TRUE)) {
-      form_set_error($field, t("The %field_title value must be a valid, absolute URL", array('%field_title' => $field_title)));
-    }
+function akamai_settings_validate_credential_field(&$element, &$form_state, $form) {
+  $storage_type = $element['#akamai_credential_type'];
+  $is_required = ($form_state['values']['akamai_credential_storage'] == $storage_type);
+  $value = $form_state['values'][$element['#name']];
+  $is_empty = (is_string($element['#value']) && drupal_strlen(trim($element['#value'])) == 0);
+  if ($is_required && $is_empty) {
+    form_error($element, t('!name field is required.', array('!name' => $element['#title'])));
   }
+  elseif (!$is_required) {
+    // This storage method is not being used, so set value back to the default.
+    form_set_value($element, $element['#default'], $form_state);
+  }
+}
 
-  // If the password field is not set, remove it from the values array.
-  // This prevents the value from being overwritten with an empty string.
-  if (!$form_state['values']['akamai_password']) {
-    unset($form_state['values']['akamai_password']);
+/**
+ * Sets an error if the form element's value is not a valid absolute URL.
+ */
+function akamai_settings_validate_url($element, &$form_state, $form) {
+  $url = form_state['values'][$element['#name']];
+  if (!empty($url) && !valid_url($element['#value'], TRUE)) {
+    form_error($element, t('The !name field must be a valid, absolute URL.', array('!name' => $element['#title'])));
+  }
+}
+
+/**
+ * Sets an error if the form element's value is not a path to an existing file.
+ */
+function akamai_settings_validate_file_exists($element, &$form_state, $form) {
+  $path = $form_state['values'][$element['#name']];
+  if (!empty($path) && !file_exists($path)) {
+    form_error($element, t('Could not find the .edgerc file at %path. Please verify that it exists.', array('%path' => $path)));
+  }
+}
+
+/**
+ * Sets an error if the form element's value is not a path to a readable file.
+ */
+function akamai_settings_validate_file_is_readable($element, &$form_state, $form) {
+  $path = $form_state['values'][$element['#name']];
+  if (!empty($path) && !is_readable($path)) {
+    form_error($element, t('Could not read the file at %path. Please verify that it is readable.', array('%path' => $path)));
+  }
+}
+
+/**
+ * Validate the akamai_settings form.
+ */
+function akamai_settings_validate(&$form, &$form_state) {
+  // Validate .edgerc file.
+  if ($form_state['values']['akamai_credential_storage'] == 'file') {
+    $section = $form_state['values']['akamai_edgerc_section'];
+    $path = $form_state['values']['akamai_edgerc_path'];
+    try {
+      $edgegrid_client = \Akamai\Open\EdgeGrid\Client::createFromEdgeRcFile($section, $path);
+    }
+    catch (Exception $e) {
+      form_set_error('akamai_edgerc_section', t('Could not validate .edgerc file. Exception: %message', array('%message' => $e->getMessage())));
+    }
   }
 
   // check if timeout value is an integer
