@@ -6,6 +6,8 @@
  *   Administrative pages for the Akamai module.
  */
 
+use Akamai\Open\EdgeGrid\Client as EdgeGridClient;
+
 /**
  * General Settings for Akamai
  */
@@ -146,7 +148,7 @@ function akamai_settings() {
     '#description'   => t("The timeout used by when sending the cache clear request to Akamai's servers. Most users will not need to change this value."),
     '#size'          => 5,
     '#maxlength'     => 3,
-    '#default_value' => variable_get('akamai_timeout', '5'),
+    '#default_value' => variable_get('akamai_timeout', EdgeGridClient::DEFAULT_REQUEST_TIMEOUT),
     '#required'      => TRUE,
   );
 
@@ -233,7 +235,7 @@ function akamai_settings_validate(&$form, &$form_state) {
     $section = $form_state['values']['akamai_edgerc_section'];
     $path = $form_state['values']['akamai_edgerc_path'];
     try {
-      $edgegrid_client = \Akamai\Open\EdgeGrid\Client::createFromEdgeRcFile($section, $path);
+      $edgegrid_client = EdgeGridClient::createFromEdgeRcFile($section, $path);
     }
     catch (Exception $e) {
       form_set_error('akamai_edgerc_section', t('Could not validate .edgerc file. Exception: %message', array('%message' => $e->getMessage())));

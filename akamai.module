@@ -338,6 +338,7 @@ function akamai_get_client($version = 'v3') {
   if (variable_get('akamai_credential_storage', 'database') == 'database') {
     $edgegrid_client = new \Akamai\Open\EdgeGrid\Client([
       'base_uri' => variable_get('akamai_base_uri', ''),
+      'timeout' => variable_get('akamai_timeout', \Akamai\Open\EdgeGrid\Client::DEFAULT_REQUEST_TIMEOUT),
     ]);
 
     $client_token = variable_get('akamai_client_token', '');
