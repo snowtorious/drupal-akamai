@@ -46,3 +46,10 @@ function HOOK_akamai_paths_alter(&$paths, $node)
           array can be modified.
  * `$node` If this is a node page you are viewing, this will be that node, otherwise
          it will be NULL.
+
+## Development
+
+To run unit tests with PHPUnit:
+* Run `composer install` from the repository root.
+* Run `phpunit` from the repository root.
+** The PHPUnit configuration will be read from `phpunit.xml.dist`.

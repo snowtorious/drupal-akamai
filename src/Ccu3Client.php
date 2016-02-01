@@ -72,8 +72,8 @@ class Ccu3Client implements CcuClientInterface {
    *
    * @param string $hostname
    *   The name of the URL that contains the objects you want to purge.
-   * @param array $urls
-   *   An array of fully qualified URLs to be purged.
+   * @param array $paths
+   *   An array of paths to be purged.
    * @param string $operation
    *   Should be either 'invalidate' or 'delete'.
    */
@@ -91,10 +91,26 @@ class Ccu3Client implements CcuClientInterface {
     return json_decode($response->getBody());
   }
 
+  /**
+   * Submits a purge request to invalidate a set of URLs.
+   *
+   * @param string $hostname
+   *   The name of the URL that contains the objects you want to purge.
+   * @param array $paths
+   *   An array of paths to be invalidated.
+   */
   public function invalidateUrls($hostname, $paths) {
     return $this->postPurgeRequest($hostname, $paths, 'invalidate');
   }
 
+  /**
+   * Submits a purge request to remove/delete a set of URLs.
+   *
+   * @param string $hostname
+   *   The name of the URL that contains the objects you want to purge.
+   * @param array $paths
+   *   An array of paths to be deleted.
+   */
   public function deleteUrls($hostname, $paths) {
     return $this->postPurgeRequest($hostname, $paths, 'delete');
   }
