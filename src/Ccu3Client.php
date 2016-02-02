@@ -15,6 +15,16 @@ use InvalidArgumentException;
 class Ccu3Client implements CcuClientInterface {
 
   /**
+   * The CCU API version.
+   */
+  const API_VERSION = '3';
+
+  /**
+   * The maximum size, in bytes, of a request body allowed by the API.
+   */
+  const MAX_BODY_SIZE = 50000;
+
+  /**
    * An instance of an OPEN EdgeGrid Client.
    *
    * @var \Akamai\Open\EdgeGrid\Client
@@ -26,41 +36,35 @@ class Ccu3Client implements CcuClientInterface {
    *
    * @var string
    */
-  protected $network = 'production';
+  protected $network = self::NETWORK_PRODUCTION;
 
   /**
    * The version of the CCU API.
+   *
+   * @var string
    */
-  protected $version = 'v3';
+  protected $version = 'v' . self::API_VERSION;
+
 
   /**
-   * Constructor.
-   *
-   * @param \Akamai\Open\EdgeGrid\Client $client
-   *   An instance of the EdgeGrid HTTP client class.
+   * Implements CcuClientInterface::__construct().
    */
   public function __construct(EdgeGridClient $client) {
     $this->client = $client;
   }
 
   /**
-   * Sets the network on which purge requests will be executed.
-   *
-   * @param string $network
-   *   Must be either 'production' or 'staging'.
+   * Implements CcuClientInterface::setNetwork().
    */
   public function setNetwork($network) {
-    if ($network != 'production' && $network != 'staging') {
+    if ($network != self::NETWORK_PRODUCTION && $network != self::NETWORK_STAGING) {
       throw new InvalidArgumentException('Invalid queue name supplied.');
     }
     $this->network = $network;
   }
 
   /**
-   * Checks the progress of a purge request.
-   *
-   * @param string $progress_uri
-   *  A URI as provided in response to a purge request.
+   * Implements CcuClientInterface::checkProgress().
    */
   public function checkProgress($progress_uri) {
     $response = $this->client->get($progress_uri);
@@ -68,51 +72,56 @@ class Ccu3Client implements CcuClientInterface {
   }
 
   /**
-   * Submits a purge request for one or more URLs.
-   *
-   * @param string $hostname
-   *   The name of the URL that contains the objects you want to purge.
-   * @param array $paths
-   *   An array of paths to be purged.
-   * @param string $operation
-   *   Should be either 'invalidate' or 'delete'.
+   * Implements CcuClientInterface::postPurgeRequest().
    */
   public function postPurgeRequest($hostname, $paths, $operation = 'invalidate') {
-    $purge_body = array(
-      'hostname' => $hostname,
-      'objects' => $paths,
-    );
-
     $uri = "/ccu/{$this->version}/{$operation}/url/{$this->network}";
     $response = $this->client->post($uri, [
-      'body' => json_encode($purge_body),
+      'body' => $this->getPurgeBody($hostname, $paths),
       'headers' => ['Content-Type' => 'application/json']
     ]);
     return json_decode($response->getBody());
   }
 
   /**
-   * Submits a purge request to invalidate a set of URLs.
-   *
-   * @param string $hostname
-   *   The name of the URL that contains the objects you want to purge.
-   * @param array $paths
-   *   An array of paths to be invalidated.
+   * Implements CcuClientInterface::invalidateUrls().
    */
   public function invalidateUrls($hostname, $paths) {
     return $this->postPurgeRequest($hostname, $paths, 'invalidate');
   }
 
   /**
-   * Submits a purge request to remove/delete a set of URLs.
+   * Implements CcuClientInterface::deleteUrls().
+   */
+  public function deleteUrls($hostname, $paths) {
+    return $this->postPurgeRequest($hostname, $paths, 'delete');
+  }
+
+  /**
+   * Verifies that the body of a purge request will be under 50,000 bytes.
    *
    * @param string $hostname
    *   The name of the URL that contains the objects you want to purge.
    * @param array $paths
-   *   An array of paths to be deleted.
+   *   An array of paths to be purged.
+   * @return bool
+   *   TRUE if the body size is below the limit, otherwise FALSE.
    */
-  public function deleteUrls($hostname, $paths) {
-    return $this->postPurgeRequest($hostname, $paths, 'delete');
+  public function bodyIsBelowLimit($hostname, $paths) {
+    $body = $this->getPurgeBody($hostname, $paths);
+    $bytes = mb_strlen($body, '8bit');
+    return $bytes < self::MAX_BODY_SIZE;
+  }
+
+  /**
+   * Generates a JSON-encoded body for a purge request.
+   */
+  protected function getPurgeBody($hostname, $paths) {
+    $purge_body = array(
+      'hostname' => $hostname,
+      'objects' => $paths,
+    );
+    return json_encode($purge_body);
   }
 
 }

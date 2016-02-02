@@ -15,6 +15,16 @@ use InvalidArgumentException;
 interface CcuClientInterface {
 
   /**
+   * String constant for the production network.
+   */
+  const NETWORK_PRODUCTION = 'production';
+
+  /**
+   * String constant for the staging network.
+   */
+  const NETWORK_STAGING = 'staging';
+
+  /**
    * Constructor.
    *
    * @param \Akamai\Open\EdgeGrid\Client $client
@@ -50,8 +60,24 @@ interface CcuClientInterface {
    */
   public function postPurgeRequest($hostname, $paths, $operation = 'invalidate');
 
+  /**
+   * Submits a purge request to invalidate a set of URLs.
+   *
+   * @param string $hostname
+   *   The name of the URL that contains the objects you want to purge.
+   * @param array $paths
+   *   An array of paths to be invalidated.
+   */
   public function invalidateUrls($hostname, $paths);
 
+  /**
+   * Submits a purge request to remove/delete a set of URLs.
+   *
+   * @param string $hostname
+   *   The name of the URL that contains the objects you want to purge.
+   * @param array $paths
+   *   An array of paths to be deleted.
+   */
   public function deleteUrls($hostname, $paths);
 
 }

@@ -37,20 +37,14 @@ class Ccu2Client implements CcuClientInterface {
   protected $queuename = 'default';
 
   /**
-   * Constructor.
-   *
-   * @param \Akamai\Open\EdgeGrid\Client $client
-   *   An instance of the EdgeGrid HTTP client class.
+   * Implements CcuClientInterface::__construct().
    */
   public function __construct(EdgeGridClient $client) {
     $this->client = $client;
   }
 
   /**
-   * Sets the network on which purge requests will be executed.
-   *
-   * @param string $network
-   *   Must be either 'production' or 'staging'.
+   * Implements CcuClientInterface::setNetwork().
    */
   public function setNetwork($network) {
     if ($network != 'production' && $network != 'staging') {
@@ -85,10 +79,7 @@ class Ccu2Client implements CcuClientInterface {
   }
 
   /**
-   * Checks the progress of a purge request.
-   *
-   * @param string $progress_uri
-   *  A URI as provided in response to a purge request.
+   * Implements CcuClientInterface::checkProgress().
    */
   public function checkProgress($progress_uri) {
     $response = $this->client->get($progress_uri);
@@ -96,14 +87,7 @@ class Ccu2Client implements CcuClientInterface {
   }
 
   /**
-   * Submits a purge request for one or more URLs.
-   *
-   * @param string $hostname
-   *   The name of the URL that contains the objects you want to purge.
-   * @param array $urls
-   *   An array of fully qualified URLs to be purged.
-   * @param string $operation
-   *   Should be either 'invalidate' or 'remove'.
+   * Implements CcuClientInterface::postPurgeRequest().
    */
   public function postPurgeRequest($hostname, $paths, $operation = 'invalidate') {
     // Prepend hostname to paths.
@@ -125,10 +109,16 @@ class Ccu2Client implements CcuClientInterface {
     return json_decode($response->getBody());
   }
 
+  /**
+   * Implements CcuClientInterface::invalidateUrls().
+   */
   public function invalidateUrls($hostname, $paths) {
     return $this->postPurgeRequest($hostname, $paths, 'invalidate');
   }
 
+  /**
+   * Implements CcuClientInterface::deleteUrls().
+   */
   public function deleteUrls($hostname, $paths) {
     return $this->postPurgeRequest($hostname, $paths, 'delete');
   }

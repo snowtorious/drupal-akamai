@@ -36,9 +36,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase {
     // Create stub for the EdgeGrid client class.
     $edgegrid_client = $this->getMockBuilder('\Akamai\Open\EdgeGrid\Client')
       ->disableOriginalConstructor()
-      ->setMethods(array(
-          'get',
-      ))
+      ->setMethods(['get'])
       ->getMock();
     $edgegrid_client->method('get')
          ->willReturn($response_stub);
@@ -82,21 +80,17 @@ class ClientTest extends \PHPUnit_Framework_TestCase {
     // Create stub for the EdgeGrid client class.
     $edgegrid_client = $this->getMockBuilder('\Akamai\Open\EdgeGrid\Client')
       ->disableOriginalConstructor()
-      ->setMethods(array(
-          'post',
-      ))
+      ->setMethods(['post'])
       ->getMock();
     $edgegrid_client->method('post')
          ->willReturn($response_stub);
-
-
-    $ccu_client = new Ccu3Client($edgegrid_client);
 
     // Ensure that the `getBody` method of the response object is called.
     $response_stub->expects($this->once())
       ->method('getBody');
 
     // Ensure that the `post` method of the EdgeGrid client is called.
+    // Ensure that the `Content-Type: application/json` header is set.
     // Also verify that the payload is encoded as JSON and contains the
     // expected 'hostname' and 'objects' parameters.
     $edgegrid_client->expects($this->once())
@@ -105,6 +99,12 @@ class ClientTest extends \PHPUnit_Framework_TestCase {
         $this->equalTo("/ccu/v3/{$operation}/url/production"),
         $this->callback(function($payload) use ($hostname, $path){
           if (!isset($payload['body'])) {
+            return FALSE;
+          }
+          if (!isset($payload['headers']) && !isset($payload['headers']['Content-Type'])) {
+            return FALSE;
+          }
+          if ($payload['headers']['Content-Type'] != 'application/json') {
             return FALSE;
           }
           $decoded = json_decode($payload['body'], TRUE);
@@ -118,7 +118,27 @@ class ClientTest extends \PHPUnit_Framework_TestCase {
         })
       );
 
-    $result = $ccu_client->postPurgeRequest('www.example.com', array('/robots.txt'), 'invalidate');
+    $ccu_client = new Ccu3Client($edgegrid_client);
+    $result = $ccu_client->postPurgeRequest($hostname, [$path], 'invalidate');
     $this->assertSame($result->estimatedSeconds, 5, 'Method postPurgeRequest did not return decoded JSON response.');
+  }
+
+  /**
+   * @covers Drupal\akamai\Ccu3Client::bodyIsBelowLimit
+   */
+  public function testBodyIsBelowLimit() {
+    // Create stub for the EdgeGrid client class.
+    $edgegrid_client = $this->getMockBuilder('\Akamai\Open\EdgeGrid\Client')
+      ->disableOriginalConstructor()
+      ->setMethods(['post'])
+      ->getMock();
+
+    $ccu_client = new Ccu3Client($edgegrid_client);
+    $hostname = 'www.example.com';
+    $paths = array_fill(0, 12489, 'a');
+    $this->assertTrue($ccu_client->bodyIsBelowLimit($hostname, $paths), 'Body size is not below limit.');
+
+    $paths = array_fill(0, 12490, 'a');
+    $this->assertFalse($ccu_client->bodyIsBelowLimit($hostname, $paths), 'Expected body size to exceed limit.');
   }
 }
