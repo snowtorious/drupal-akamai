@@ -267,12 +267,13 @@ function akamai_clear_url($paths_in, $params = array(), $node = NULL) {
     }
 
     // v2 of the API uses 'remove', but v3 uses 'delete'.
-    if ($params['action'] == $client::OPERATION_DELETE) {
-      $response = $client->deleteUrls($hostname, $paths);
+    if ($params['action'] == 'remove') {
+      $client->setOperation($client::OPERATION_DELETE);
     }
     else {
-      $response = $client->invalidateUrls($hostname, $paths);
+      $client->setOperation($client::OPERATION_INVALIDATE);
     }
+    $response = $client->postPurgeRequest($hostname, $paths);
     return $response;
   }
   catch (AkamaiException $e) {

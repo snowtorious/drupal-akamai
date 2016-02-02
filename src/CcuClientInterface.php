@@ -46,6 +46,13 @@ interface CcuClientInterface {
   public function setNetwork($network);
 
   /**
+   * Sets the operation to use when issuing a purge request.
+   *
+   * @param string $operation
+   */
+  public function setOperation($operation);
+
+  /**
    * Checks the progress of a purge request.
    *
    * @param string $progress_uri
@@ -60,29 +67,33 @@ interface CcuClientInterface {
    *   The name of the URL that contains the objects you want to purge.
    * @param array $urls
    *   An array of fully qualified URLs to be purged.
-   * @param string $operation
-   *   Should be either 'invalidate' or 'delete'.
    */
-  public function postPurgeRequest($hostname, $paths, $operation = 'invalidate');
+  public function postPurgeRequest($hostname, $paths);
 
   /**
-   * Submits a purge request to invalidate a set of URLs.
+   * Generates the URL to use when posting a purge request.
+   *
+   * @return string
+   */
+  public function getPurgeApiEndpoint();
+
+  /**
+   * Generates a JSON-encoded body for a purge request.
+   *
+   * @return string
+   */
+  public function getPurgeBody($hostname, $paths);
+
+  /**
+   * Verifies that the body of a purge request will be under 50,000 bytes.
    *
    * @param string $hostname
    *   The name of the URL that contains the objects you want to purge.
    * @param array $paths
-   *   An array of paths to be invalidated.
+   *   An array of paths to be purged.
+   * @return bool
+   *   TRUE if the body size is below the limit, otherwise FALSE.
    */
-  public function invalidateUrls($hostname, $paths);
-
-  /**
-   * Submits a purge request to remove/delete a set of URLs.
-   *
-   * @param string $hostname
-   *   The name of the URL that contains the objects you want to purge.
-   * @param array $paths
-   *   An array of paths to be deleted.
-   */
-  public function deleteUrls($hostname, $paths);
+  public function bodyIsBelowLimit($hostname, $paths);
 
 }
