@@ -240,11 +240,6 @@ function akamai_clear_url($paths_in, $params = array(), $node = NULL) {
 
   $paths = array_unique($paths);
 
-  // Normalize all paths so that they all begin with a '/'.
-  foreach ($paths as $key => $path) {
-    $paths[$key] = rtrim(preg_match("/^\//", $path) ? $path : "/$path");
-  }
-
   $default_params =  array(
     'basepath'  => variable_get("akamai_basepath", $GLOBALS['base_url']),
     'action'    => variable_get("akamai_action", "invalidate"),

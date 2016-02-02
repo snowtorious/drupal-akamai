@@ -74,8 +74,10 @@ class Ccu2Client extends BaseCcuClient implements CcuClientInterface {
    * Implements CcuClientInterface::getPurgeBody().
    */
   public function getPurgeBody($hostname, $paths) {
-    // Prepend hostname and schemes to paths.
+    // Strip whitespace from paths and ensure each path begins with a '/'.
+    // CCU API v2 requires absolute URLs, so prepend hostname and schemes.
     foreach ($paths as $key => $path) {
+      $path = rtrim(preg_match("/^\//", $path) ? $path : "/{$path}");
       $paths[$key] = 'http://' . $hostname . $path;
       $paths[] = 'https://' . $hostname . $path;
     }

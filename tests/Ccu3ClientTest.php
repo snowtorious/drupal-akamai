@@ -135,10 +135,10 @@ class ClientTest extends \PHPUnit_Framework_TestCase {
 
     $ccu_client = new Ccu3Client($edgegrid_client);
     $hostname = 'www.example.com';
-    $paths = array_fill(0, 12489, 'a');
+    $paths = array_fill(0, 10, '/a');
     $this->assertTrue($ccu_client->bodyIsBelowLimit($hostname, $paths), 'Body size is not below limit.');
 
-    $paths = array_fill(0, 12490, 'a');
+    $paths = array_fill(0, 15000, '/a');
     $this->assertFalse($ccu_client->bodyIsBelowLimit($hostname, $paths), 'Expected body size to exceed limit.');
   }
 }
