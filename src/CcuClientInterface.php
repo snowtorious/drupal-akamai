@@ -25,6 +25,11 @@ interface CcuClientInterface {
   const NETWORK_STAGING = 'staging';
 
   /**
+   * The maximum size, in bytes, of a request body allowed by the API.
+   */
+  const MAX_BODY_SIZE = 50000;
+
+  /**
    * Constructor.
    *
    * @param \Akamai\Open\EdgeGrid\Client $client

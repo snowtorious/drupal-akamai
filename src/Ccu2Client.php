@@ -15,6 +15,23 @@ use InvalidArgumentException;
 class Ccu2Client implements CcuClientInterface {
 
   /**
+   * The CCU API version.
+   */
+  const API_VERSION = 2;
+
+  /**
+   * The string used when invalidating objects.
+   */
+  const OPERATION_INVALIDATE = 'invalidate';
+
+  /**
+   * The string used when removing objects.
+   */
+  const OPERATION_DELETE = 'remove';
+
+  /**
+   * An instance of an OPEN EdgeGrid Client.
+   *
    * @var \Akamai\Open\EdgeGrid\Client
    */
   protected $client;
@@ -24,14 +41,18 @@ class Ccu2Client implements CcuClientInterface {
    *
    * @var string
    */
-  protected $network = 'production';
+  protected $network = self::NETWORK_PRODUCTION;
 
   /**
    * The version of the CCU API.
+   *
+   * @var string
    */
-  protected $version = 'v2';
+  protected $version = 'v' . self::API_VERSION;
 
   /**
+   * The queue to use when issuing a purge request.
+   *
    * @var string
    */
   protected $queuename = 'default';
@@ -47,7 +68,7 @@ class Ccu2Client implements CcuClientInterface {
    * Implements CcuClientInterface::setNetwork().
    */
   public function setNetwork($network) {
-    if ($network != 'production' && $network != 'staging') {
+    if ($network != self::NETWORK_PRODUCTION && $network != self::NETWORK_STAGING) {
       throw new InvalidArgumentException('Invalid queue name supplied.');
     }
     $this->network = $network;
@@ -89,7 +110,49 @@ class Ccu2Client implements CcuClientInterface {
   /**
    * Implements CcuClientInterface::postPurgeRequest().
    */
-  public function postPurgeRequest($hostname, $paths, $operation = 'invalidate') {
+  public function postPurgeRequest($hostname, $paths, $operation = self::OPERATION_INVALIDATE) {
+    $uri = "/ccu/{$this->version}/queues/{$this->queuename}";
+    $response = $this->client->post($uri, [
+      'body' => $this->getPurgeBody($hostname, $paths, $operation),
+      'headers' => ['Content-Type' => 'application/json']
+    ]);
+    return json_decode($response->getBody());
+  }
+
+  /**
+   * Implements CcuClientInterface::invalidateUrls().
+   */
+  public function invalidateUrls($hostname, $paths) {
+    return $this->postPurgeRequest($hostname, $paths, self::OPERATION_INVALIDATE);
+  }
+
+  /**
+   * Implements CcuClientInterface::deleteUrls().
+   */
+  public function deleteUrls($hostname, $paths) {
+    return $this->postPurgeRequest($hostname, $paths, self::OPERATION_DELETE);
+  }
+
+  /**
+   * Verifies that the body of a purge request will be under 50,000 bytes.
+   *
+   * @param string $hostname
+   *   The name of the URL that contains the objects you want to purge.
+   * @param array $paths
+   *   An array of paths to be purged.
+   * @return bool
+   *   TRUE if the body size is below the limit, otherwise FALSE.
+   */
+  public function bodyIsBelowLimit($hostname, $paths) {
+    $body = $this->getPurgeBody($hostname, $paths);
+    $bytes = mb_strlen($body, '8bit');
+    return $bytes < self::MAX_BODY_SIZE;
+  }
+
+  /**
+   * Generates a JSON-encoded body for a purge request.
+   */
+  protected function getPurgeBody($hostname, $paths, $operation) {
     // Prepend hostname to paths.
     foreach ($paths as $key => $path) {
       $paths[$key] = 'http://' . $hostname . $path;
@@ -100,27 +163,7 @@ class Ccu2Client implements CcuClientInterface {
       'objects' => $paths,
       'domain' => $this->network,
     );
-    ///ccu/v2/queues/{queuename}
-    $uri = "/ccu/{$this->version}/queues/{$this->queuename}";
-    $response = $this->client->post($uri, [
-      'body' => json_encode($purge_body),
-      'headers' => ['Content-Type' => 'application/json']
-    ]);
-    return json_decode($response->getBody());
-  }
-
-  /**
-   * Implements CcuClientInterface::invalidateUrls().
-   */
-  public function invalidateUrls($hostname, $paths) {
-    return $this->postPurgeRequest($hostname, $paths, 'invalidate');
-  }
-
-  /**
-   * Implements CcuClientInterface::deleteUrls().
-   */
-  public function deleteUrls($hostname, $paths) {
-    return $this->postPurgeRequest($hostname, $paths, 'delete');
+    return json_encode($purge_body);
   }
 
 }

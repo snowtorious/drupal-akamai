@@ -17,12 +17,17 @@ class Ccu3Client implements CcuClientInterface {
   /**
    * The CCU API version.
    */
-  const API_VERSION = '3';
+  const API_VERSION = 3;
 
   /**
-   * The maximum size, in bytes, of a request body allowed by the API.
+   * The string used when invalidating objects.
    */
-  const MAX_BODY_SIZE = 50000;
+  const OPERATION_INVALIDATE = 'invalidate';
+
+  /**
+   * The string used when removing objects.
+   */
+  const OPERATION_DELETE = 'remove';
 
   /**
    * An instance of an OPEN EdgeGrid Client.
@@ -74,7 +79,7 @@ class Ccu3Client implements CcuClientInterface {
   /**
    * Implements CcuClientInterface::postPurgeRequest().
    */
-  public function postPurgeRequest($hostname, $paths, $operation = 'invalidate') {
+  public function postPurgeRequest($hostname, $paths, $operation = self::OPERATION_INVALIDATE) {
     $uri = "/ccu/{$this->version}/{$operation}/url/{$this->network}";
     $response = $this->client->post($uri, [
       'body' => $this->getPurgeBody($hostname, $paths),
@@ -87,14 +92,14 @@ class Ccu3Client implements CcuClientInterface {
    * Implements CcuClientInterface::invalidateUrls().
    */
   public function invalidateUrls($hostname, $paths) {
-    return $this->postPurgeRequest($hostname, $paths, 'invalidate');
+    return $this->postPurgeRequest($hostname, $paths, self::OPERATION_INVALIDATE);
   }
 
   /**
    * Implements CcuClientInterface::deleteUrls().
    */
   public function deleteUrls($hostname, $paths) {
-    return $this->postPurgeRequest($hostname, $paths, 'delete');
+    return $this->postPurgeRequest($hostname, $paths, self::OPERATION_DELETE);
   }
 
   /**
