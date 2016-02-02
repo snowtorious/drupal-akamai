@@ -257,7 +257,7 @@ function akamai_clear_url($paths_in, $params = array(), $node = NULL) {
     $hostname = empty($parsed['host']) ? NULL : $parsed['host'];
   }
 
-  $version = variable_get('akamai_ccu_version', 'v3');
+  $version = variable_get('akamai_ccu_version', 3);
 
   try {
     $client = akamai_get_client($version);
@@ -331,10 +331,10 @@ function _akamai_get_all_paths($url, $node = NULL) {
 /**
  * Gets an instance of a CCU client class.
  *
- * @param string $version
- *   Specifies which version of the CCU API to use. Either 'v2' or 'v3'.
+ * @param int $version
+ *   Specifies which version of the CCU API to use. Either 2 or 3.
  */
-function akamai_get_client($version = 'v3') {
+function akamai_get_client($version = 3) {
   if (variable_get('akamai_credential_storage', 'database') == 'database') {
     $edgegrid_client = new \Akamai\Open\EdgeGrid\Client([
       'base_uri' => variable_get('akamai_base_uri', ''),
@@ -352,7 +352,7 @@ function akamai_get_client($version = 'v3') {
     $edgegrid_client = \Akamai\Open\EdgeGrid\Client::createFromEdgeRcFile($section, $path);
   }
 
-  if ($version == 'v2') {
+  if ($version == 2) {
     $ccu_client = new \Drupal\akamai\Ccu2Client($edgegrid_client);
   }
   else {
