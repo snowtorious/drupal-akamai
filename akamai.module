@@ -248,7 +248,7 @@ function akamai_clear_url($paths_in, $params = array(), $node = NULL) {
   $default_params =  array(
     'basepath'  => variable_get("akamai_basepath", $GLOBALS['base_url']),
     'action'    => variable_get("akamai_action", "invalidate"),
-    'domain'    => variable_get("akamai_domain", ""),
+    'domain'    => variable_get("akamai_network", ""),
   );
 
   $params = array_merge($default_params, $params);
@@ -267,7 +267,7 @@ function akamai_clear_url($paths_in, $params = array(), $node = NULL) {
     }
 
     // v2 of the API uses 'remove', but v3 uses 'delete'.
-    if ($params['action'] == 'remove' || $params['action'] == 'delete') {
+    if ($params['action'] == $client::OPERATION_DELETE) {
       $response = $client->deleteUrls($hostname, $paths);
     }
     else {
@@ -358,6 +358,8 @@ function akamai_get_client($version = 3) {
   else {
     $ccu_client = new \Drupal\akamai\Ccu3Client($edgegrid_client);
   }
+
+  $ccu_client->setNetwork(variable_get('akamai_network', 'production'));
 
   return $ccu_client;
 }

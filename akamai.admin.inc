@@ -7,6 +7,7 @@
  */
 
 use Akamai\Open\EdgeGrid\Client as EdgeGridClient;
+use Drupal\akamai\CcuClientInterface;
 
 /**
  * General Settings for Akamai
@@ -152,22 +153,22 @@ function akamai_settings() {
     '#required'      => TRUE,
   );
 
-  $form['akamai_domain'] = array(
-    '#type'          => 'select',
+  $form['akamai_network'] = array(
+    '#type'          => 'radios',
     '#title'         => t('Domain'),
-    '#default_value' => variable_get('akamai_domain', 'staging'),
+    '#default_value' => variable_get('akamai_network', CcuClientInterface::NETWORK_PRODUCTION),
     '#options'       => array(
-      'staging'    => t('Staging'),
-      'production' => t('Production'),
+      CcuClientInterface::NETWORK_STAGING    => t('Staging'),
+      CcuClientInterface::NETWORK_PRODUCTION => t('Production'),
     ),
-    '#description'   => t('The Akamai domain to use for cache clearing'),
+    '#description'   => t('The Akamai network to use for cache clearing.'),
     '#required'      => TRUE,
   );
 
   $form['akamai_action'] = array(
-    '#type'          => 'select',
+    '#type'          => 'radios',
     '#title'         => t('Clearing action type default'),
-    '#default_value' => variable_get('akamai_action', 'remove'),
+    '#default_value' => variable_get('akamai_action', 'invalidate'),
     '#options'       => array(
       'remove'     => t('Remove'),
       'invalidate' => t('Invalidate'),
@@ -267,10 +268,10 @@ function akamai_cache_control() {
   $form['domain_override'] = array(
     '#type'          => 'select',
     '#title'         => t('Domain'),
-    '#default_value' => variable_get('akamai_domain', 'staging'),
+    '#default_value' => variable_get('akamai_network', CcuClientInterface::NETWORK_PRODUCTION),
     '#options'       => array(
-      'staging'    => t('Staging'),
-      'production' => t('Production'),
+      CcuClientInterface::NETWORK_STAGING    => t('Staging'),
+      CcuClientInterface::NETWORK_PRODUCTION => t('Production'),
     ),
     '#description'   => t('The Akamai domain to use for cache clearing.  Defaults to the Domain setting from the settings page.')
   );
