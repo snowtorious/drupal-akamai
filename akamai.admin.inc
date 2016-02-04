@@ -17,14 +17,37 @@ function akamai_settings() {
 
   $form['disable_fieldset'] = array(
     '#type' => 'fieldset',
-    '#title' => 'Disable Akamai Cache Clearing',
-    '#description' => 'Set this field to temporarity disable cache clearing during imports, migrations, or other batch processes.',
+    '#title' => t('Disable akamai cache clearing'),
+    '#description' => t('Set this field to temporarity purge request submissions. Purge requests will still be queued if queueing is enabled. This can be useful when performing imports, migrations, or other batch processes.'),
   );
 
   $form['disable_fieldset']['akamai_disabled'] = array(
     '#type'          => 'checkbox',
     '#title'         => t('Disable cache clearing'),
     '#default_value' => variable_get('akamai_disabled', FALSE),
+  );
+
+  $form['queue'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Purge request queue'),
+  );
+  $form['queue']['akamai_queue_purge_requests'] = array(
+    '#type'          => 'checkbox',
+    '#title'         => t('Enable queueing of purge requests'),
+    '#default_value' => variable_get('akamai_queue_purge_requests', FALSE),
+    '#description'   => t('If enabled, purge requests will be queued and submitted when cron runs.'),
+  );
+  $form['queue']['akamai_queue_purge_requests'] = array(
+    '#type'          => 'checkbox',
+    '#title'         => t('Enable queueing of purge requests'),
+    '#default_value' => variable_get('akamai_queue_purge_requests', FALSE),
+    '#description'   => t('If enabled, purge requests will be queued and submitted when cron runs.'),
+  );
+  $form['queue']['akamai_queue_on_failure'] = array(
+    '#type'          => 'checkbox',
+    '#title'         => t('Queue failed purge requests'),
+    '#default_value' => variable_get('akamai_queue_on_failure', TRUE),
+    '#description'   => t('If a purge request fails, the paths will be added to the queue and re-submitted when cron runs.'),
   );
 
   $form['credentials'] = array(
@@ -132,16 +155,22 @@ function akamai_settings() {
     '#akamai_credential_type' => 'file',
   );
 
-  $form['akamai_basepath'] = array(
+  $default_hostname = parse_url($GLOBALS['base_url'], 'host');
+  $form['akamai_hostname'] = array(
     '#type'          => 'textfield',
-    '#title'         => t('Base path'),
-    '#default_value' => variable_get('akamai_basepath', ''),
-    '#description'   => t('The URL of the base path (fully qualified domain name) of the site.  This will be used as a prefix for all cache clears (Akamai indexs on the full URI). e.g. "http://www.example.com"'),
+    '#title'         => t('Hostname'),
+    '#default_value' => variable_get('akamai_hostname', $default_hostname),
+    '#description'   => t('The hostname that contains objects (paths) you want to purge, e.g. "www.example.com"'),
     '#required'      => TRUE,
-    '#element_validate' => array(
-      'akamai_settings_validate_url',
-    ),
   );
+  if (drupal_multilingual()) {
+    $form['akamai_use_language_domain'] = array(
+      '#type'          => 'checkbox',
+      '#title'         => t('Use language domain for hostname.'),
+      '#default_value' => variable_get('akamai_use_language_domain', FALSE),
+      '#description'   => t('For multilingual sites, you may need to purge from multiple hostnames. Checking this box will cause the language domains specified in the <a href="!url">language settings</a> to be used as the hostname when submitting purge requests.', array('!url' => url('admin/config/regional/language'))),
+    );
+  }
 
   $form['akamai_timeout'] = array(
     '#type'          => 'textfield',
