@@ -270,12 +270,12 @@ function akamai_purge_paths(array $paths, $hostname = NULL) {
   }
   // Either queue the purge request or submit it now.
   if (variable_get('akamai_queue_purge_requests', FALSE)) {
-    return akamai_queue_purge($hostname, $paths);
+    return akamai_queue_purge_request($hostname, $paths);
   }
   else {
     $result = akamai_submit_purge_request($hostname, $paths);
     if ($result == FALSE && variable_get('akamai_queue_on_failure', TRUE)) {
-      return akamai_queue_purge($hostname, $paths);
+      return akamai_queue_purge_request($hostname, $paths);
     }
   }
   return $result;
@@ -360,6 +360,9 @@ function akamai_get_hostname($language = NULL) {
  *   The name of the URL that contains the objects you want to purge.
  * @param array $paths
  *   An array of paths to be purged.
+ *
+ * @return mixed
+ *   If the request was accepted, a response object. Otherwise, FALSE.
  */
 function akamai_submit_purge_request($hostname, array $paths) {
   if (variable_get('akamai_disabled', FALSE)) {
@@ -367,11 +370,15 @@ function akamai_submit_purge_request($hostname, array $paths) {
     return FALSE;
   }
   try {
-    $version = variable_get('akamai_ccu_version', 3);
-    $ccu = akamai_get_client($version);
-    return $ccu->postPurgeRequest($hostname, $paths);
+    $ccu = akamai_get_client();
+    $response = $ccu->postPurgeRequest($hostname, $paths);
+    return $response;
   }
   catch (Exception $e) {
+    $response = $e->getResponse();
+    if (!empty($response)) {
+      watchdog('akamai', 'Response: ' . '<pre>' . $response->getBody()->getContents() . '</pre>');
+    }
     watchdog_exception('akamai', $e);
     return FALSE;
   }
@@ -385,8 +392,73 @@ function akamai_submit_purge_request($hostname, array $paths) {
  * @param array $paths
  *   An array of paths to be purged.
  */
-function akamai_queue_purge($hostname, $paths) {
+function akamai_queue_purge_request($hostname, $paths) {
+  $queue = DrupalQueue::get('akamai_ccu');
+  return $queue->createItem(['hostname' => $hostname, 'paths' => $paths]);
+}
 
+/**
+ * Implements hook_cron().
+ */
+function akamai_cron() {
+  if (variable_get('akamai_disabled', FALSE)) {
+    watchdog('akamai', 'Akamai cron task skipped because purging is disabled. Check module settings.');
+    return;
+  }
+
+  $end = time() + variable_get('akamai_cron_time_limit', 15);
+  $queue = DrupalQueue::get('akamai_ccu');
+  $client = akamai_get_client();
+  $batch_size = variable_get('akamai_batch_size', NULL);
+  $batcher = new \Drupal\akamai\Batcher($client, $batch_size);
+
+  while (time() < $end && ($item = $queue->claimItem())) {
+    $batcher->insertItem($item);
+  }
+
+  // Submit at least one batch.
+  // Continue submitting batches until time limit is reached.
+  while (!$batcher->isEmpty()) {
+    $batch = $batcher->getBatch();
+    $success = akamai_submit_batch($batch);
+    if ($success || !variable_get('akamai_queue_on_failure', TRUE)) {
+      foreach ($batch->getItems() as $item) {
+        $queue->deleteItem($item);
+      }
+    }
+    else {
+      foreach ($batch->getItems() as $item) {
+        $queue->releaseItem($item);
+      }
+    }
+
+    if (time() > $end) {
+      break;
+    }
+  }
+
+  // Release any items that didn't make it into a batch.
+  if (!$batcher->isEmpty()) {
+    $unsubmitted_items = $batcher->getItems();
+    foreach ($unsubmitted_items as $item) {
+      $queue->releaseItem($item);
+    }
+  }
+
+}
+
+/**
+ * Submits a batch of queued purge request items to the CCU API.
+ */
+function akamai_submit_batch(\Drupal\akamai\Batch $batch) {
+  try {
+    akamai_submit_purge_request($batch->getHostname(), $batch->getPaths());
+    return TRUE;
+  }
+  catch (Exception $e) {
+    watchdog_exception('akamai', $e);
+  }
+  return FALSE;
 }
 
 /**
@@ -483,7 +555,7 @@ function akamai_clear_url($paths_in, $params = [], $node = NULL) {
  * @param int $version
  *   Specifies which version of the CCU API to use. Either 2 or 3.
  */
-function akamai_get_client($version = 3) {
+function akamai_get_client($version = NULL) {
   if (variable_get('akamai_credential_storage', 'database') == 'database') {
     $edgegrid_client = new \Akamai\Open\EdgeGrid\Client([
       'base_uri' => variable_get('akamai_base_uri', ''),
@@ -501,6 +573,7 @@ function akamai_get_client($version = 3) {
     $edgegrid_client = \Akamai\Open\EdgeGrid\Client::createFromEdgeRcFile($section, $path);
   }
 
+  $version = empty($version) ? variable_get('akamai_ccu_version', 3) : $version;
   if ($version == 2) {
     $ccu_client = new \Drupal\akamai\Ccu2Client($edgegrid_client);
   }

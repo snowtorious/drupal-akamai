@@ -10,7 +10,6 @@
 namespace Drupal\akamai;
 
 use Akamai\Open\EdgeGrid\Client as EdgeGridClient;
-use InvalidArgumentException;
 
 interface CcuClientInterface {
 
