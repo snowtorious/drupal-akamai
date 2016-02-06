@@ -155,7 +155,7 @@ function akamai_settings() {
     '#akamai_credential_type' => 'file',
   );
 
-  $default_hostname = parse_url($GLOBALS['base_url'], 'host');
+  $default_hostname = parse_url($GLOBALS['base_url'], PHP_URL_HOST);
   $form['akamai_hostname'] = array(
     '#type'          => 'textfield',
     '#title'         => t('Hostname'),
