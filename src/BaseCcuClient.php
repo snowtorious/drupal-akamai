@@ -85,7 +85,10 @@ abstract class BaseCcuClient implements CcuClientInterface {
   /**
    * Implements CcuClientInterface::postPurgeRequest().
    */
-  public function postPurgeRequest($hostname, $paths) {
+  public function postPurgeRequest($hostname, array $paths) {
+    if (empty($hostname)) {
+      throw new InvalidArgumentException("Expected hostname to be a non-empty string.");
+    }
     $uri = $this->getPurgeApiEndpoint();
     $response = $this->client->post($uri, [
       'body' => $this->getPurgeBody($hostname, $paths),
@@ -97,7 +100,7 @@ abstract class BaseCcuClient implements CcuClientInterface {
   /**
    * Implements CcuClientInterface::bodyIsBelowLimit().
    */
-  public function bodyIsBelowLimit($hostname, $paths) {
+  public function bodyIsBelowLimit($hostname, array $paths) {
     $body = $this->getPurgeBody($hostname, $paths);
     $bytes = mb_strlen($body, '8bit');
     return $bytes < self::MAX_BODY_SIZE;

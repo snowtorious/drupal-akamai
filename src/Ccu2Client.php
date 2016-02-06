@@ -73,7 +73,7 @@ class Ccu2Client extends BaseCcuClient implements CcuClientInterface {
   /**
    * Implements CcuClientInterface::getPurgeBody().
    */
-  public function getPurgeBody($hostname, $paths) {
+  public function getPurgeBody($hostname, array $paths) {
     // Strip whitespace from paths and ensure each path begins with a '/'.
     // CCU API v2 requires absolute URLs, so prepend hostname and schemes.
     foreach ($paths as $key => $path) {
@@ -83,7 +83,7 @@ class Ccu2Client extends BaseCcuClient implements CcuClientInterface {
     }
     $purge_body = array(
       'action' => $this->operation,
-      'objects' => $paths,
+      'objects' => array_unique($paths),
       'domain' => $this->network,
     );
     return json_encode($purge_body);

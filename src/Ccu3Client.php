@@ -36,14 +36,14 @@ class Ccu3Client extends BaseCcuClient implements CcuClientInterface {
   /**
    * Implements CcuClientInterface::getPurgeBody().
    */
-  public function getPurgeBody($hostname, $paths) {
+  public function getPurgeBody($hostname, array $paths) {
     // Strip whitespace from paths and ensure each path begins with a '/'.
     foreach ($paths as $key => $path) {
       $paths[$key] = rtrim(preg_match("/^\//", $path) ? $path : "/{$path}");
     }
     $purge_body = array(
       'hostname' => $hostname,
-      'objects' => $paths,
+      'objects' => array_unique($paths),
     );
     return json_encode($purge_body);
   }

@@ -65,10 +65,10 @@ interface CcuClientInterface {
    *
    * @param string $hostname
    *   The name of the URL that contains the objects you want to purge.
-   * @param array $urls
-   *   An array of fully qualified URLs to be purged.
+   * @param array $paths
+   *   An array of paths to be purged.
    */
-  public function postPurgeRequest($hostname, $paths);
+  public function postPurgeRequest($hostname, array $paths);
 
   /**
    * Generates the URL to use when posting a purge request.
@@ -82,7 +82,7 @@ interface CcuClientInterface {
    *
    * @return string
    */
-  public function getPurgeBody($hostname, $paths);
+  public function getPurgeBody($hostname, array $paths);
 
   /**
    * Verifies that the body of a purge request will be under 50,000 bytes.
@@ -94,6 +94,6 @@ interface CcuClientInterface {
    * @return bool
    *   TRUE if the body size is below the limit, otherwise FALSE.
    */
-  public function bodyIsBelowLimit($hostname, $paths);
+  public function bodyIsBelowLimit($hostname, array $paths);
 
 }
