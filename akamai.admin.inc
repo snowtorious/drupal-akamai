@@ -49,6 +49,16 @@ function akamai_settings() {
     '#default_value' => variable_get('akamai_queue_on_failure', TRUE),
     '#description'   => t('If a purge request fails, the paths will be added to the queue and re-submitted when cron runs.'),
   );
+  $form['queue']['akamai_cron_queue_time_limit'] = array(
+    '#type'          => 'textfield',
+    '#title'         => t('Cron time limit'),
+    '#description'   => t("Items in the queue will stop being processed if this time limit is reached."),
+    '#size'          => 5,
+    '#maxlength'     => 3,
+    '#field_suffix'  => t('seconds'),
+    '#default_value' => variable_get('akamai_cron_queue_time_limit', AKAMAI_CRON_QUEUE_TIME_LIMIT_DEFAULT),
+    '#required'      => TRUE,
+  );
 
   $form['credentials'] = array(
     '#type' => 'fieldset',

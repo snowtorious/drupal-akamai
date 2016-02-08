@@ -7,6 +7,11 @@
  */
 
 /**
+ * Default max number of seconds to spend processing the cron queue.
+ */
+define('AKAMAI_CRON_QUEUE_TIME_LIMIT_DEFAULT', 15);
+
+/**
  * Implements hook_perm().
  */
 function akamai_permission() {
@@ -406,7 +411,7 @@ function akamai_cron() {
     return;
   }
 
-  $end = time() + variable_get('akamai_cron_time_limit', 15);
+  $end = time() + variable_get('akamai_cron_queue_time_limit', AKAMAI_CRON_QUEUE_TIME_LIMIT_DEFAULT);
   $queue = DrupalQueue::get('akamai_ccu');
   $client = akamai_get_client();
   $batch_size = variable_get('akamai_batch_size', NULL);
