@@ -331,7 +331,10 @@ function akamai_cache_control() {
  * Process the settings and submit to Akamai
  */
 function akamai_cache_control_submit($form, &$form_state) {
-  $paths = explode("\n", filter_xss($form_state['values']['paths']));
+  // filter_xss() does not need to be used here as it turns the & symbol into
+  // an HTML entity and v3 rejects it. We don't need HTML entites here as this
+  // data won't be used in actual HTML, just API requests.
+  $paths = explode("\n", $form_state['values']['paths']);
   $action = $form_state['values']['refresh'];
 
   $overrides = array(
