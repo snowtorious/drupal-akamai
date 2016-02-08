@@ -510,6 +510,8 @@ function akamai_clear_url($paths_in, $params = [], $node = NULL) {
     return FALSE;
   }
 
+  // This can cause the array to become non-associative and will cause
+  // json_encode() to use an object instead of an array when encoding.
   $paths = array_unique($paths);
 
   $default_params = array(
