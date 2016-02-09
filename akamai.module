@@ -96,10 +96,7 @@ function akamai_module_implements_alter(&$implementations, $hook) {
  * Implements hook_expire_cache().
  */
 function akamai_expire_cache($urls, $wildcards, $object_type, $object) {
-  foreach ($urls as $short_url => $full_url) {
-    $url = base_path() . $short_url;
-    akamai_clear_url($url, array(), $object);
-  }
+  akamai_purge_paths(array_keys($urls));
 }
 
 /**
@@ -195,13 +192,17 @@ function akamai_page_cache_control_form() {
 function akamai_page_cache_control_form_submit($form, &$form_state) {
   $values = $form_state['values'];
   $path = $values['path'];
-  $did_clear = akamai_clear_url($path, array(), $form['#node']);
-  if ($did_clear) {
-    $message = t("Akamai Cache Request has been made successfully, please allow 10 minutes for changes to take effect.");
+  $result = akamai_purge_path($path);
+  if ($result === TRUE) {
+    $message = t("A purge request for the path, %path, has been queued and will be submitted when cron runs.", array('%path' => $path));
+    drupal_set_message($message);
+  }
+  elseif (is_object($result)) {
+    $message = t("A purge request for the path, %path, has been submitted to Akamai, please allow 10 minutes for changes to take effect.", array('%path' => $path));
     drupal_set_message($message);
   }
   else {
-    drupal_set_message(t("There was a problem clearing the cache for this page.  Check your log messages for more information."), 'error');
+    drupal_set_message(t("There was a problem submitting a purge request for this page. Check your log messages for more information."), 'error');
   }
 }
 
