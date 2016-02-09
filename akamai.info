@@ -3,9 +3,7 @@ description = Cache Control integration with Akamai CDN, Akamai is a registered 
 core = 7.x
 
 dependencies[] = composer_manager
-dependencies[] = registry_autoload
 recommends[] = expire
 
-registry_autoload[] = PSR-4
 files[] = akamai.class.inc
 files[] = akamai.test
