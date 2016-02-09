@@ -49,4 +49,7 @@ function akamai_uninstall() {
   variable_del('akamai_client_secret');
   variable_del('akamai_edgerc_path');
   variable_del('akamai_edgerc_section');
+  variable_del('akamai_queue_purge_requests');
+  variable_del('akamai_queue_on_failure');
+  variable_del('akamai_cron_queue_time_limit');
 }
