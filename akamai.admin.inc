@@ -37,12 +37,6 @@ function akamai_settings() {
     '#default_value' => variable_get('akamai_queue_purge_requests', FALSE),
     '#description'   => t('If enabled, purge requests will be queued and submitted when cron runs.'),
   );
-  $form['queue']['akamai_queue_purge_requests'] = array(
-    '#type'          => 'checkbox',
-    '#title'         => t('Enable queueing of purge requests'),
-    '#default_value' => variable_get('akamai_queue_purge_requests', FALSE),
-    '#description'   => t('If enabled, purge requests will be queued and submitted when cron runs.'),
-  );
   $form['queue']['akamai_queue_on_failure'] = array(
     '#type'          => 'checkbox',
     '#title'         => t('Queue failed purge requests'),
