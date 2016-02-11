@@ -366,7 +366,6 @@ function akamai_manual_purge_form_submit($form, &$form_state) {
   // an HTML entity and v3 rejects it. We don't need HTML entities here as this
   // data won't be used in actual HTML, just API requests.
   $paths = explode("\n", $form_state['values']['paths']);
-  $action = $form_state['values']['refresh'];
 
   $overrides = array(
     'action' => $form_state['values']['refresh'],
