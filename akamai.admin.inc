@@ -145,7 +145,7 @@ function akamai_settings_form() {
     '#type'          => 'textfield',
     '#title'         => t('Access token'),
     '#default_value' => variable_get('akamai_access_token', ''),
-    '#description'   => t('Should be in for format of %token', array('%token' => 'akab-xxxxxxxxxxxxxxxx-xxxxxxxxxxxxxxxx')),
+    '#description'   => t('Should be in format of %token', array('%token' => 'akab-xxxxxxxxxxxxxxxx-xxxxxxxxxxxxxxxx')),
     '#states' => $database_field_states,
     '#element_validate' => array('akamai_settings_form_validate_credential_field'),
     '#akamai_credential_type' => 'database',
@@ -154,7 +154,7 @@ function akamai_settings_form() {
     '#type'          => 'textfield',
     '#title'         => t('Client token'),
     '#default_value' => variable_get('akamai_client_token', ''),
-    '#description'   => t('Should be in for format of %token', array('%token' => 'akab-xxxxxxxxxxxxxxxx-xxxxxxxxxxxxxxxx')),
+    '#description'   => t('Should be in format of %token', array('%token' => 'akab-xxxxxxxxxxxxxxxx-xxxxxxxxxxxxxxxx')),
     '#states' => $database_field_states,
     '#element_validate' => array('akamai_settings_form_validate_credential_field'),
     '#akamai_credential_type' => 'database',
@@ -235,7 +235,7 @@ function akamai_settings_form() {
       'remove'     => t('Remove'),
       'invalidate' => t('Invalidate'),
     ),
-    '#description'   => t('The default clearing action.  The options are <em>remove</em> (which removes the item from the Akamai cache) and <em>invalidate</em> (which leaves the item in the cache, but invalidates it so that the origin will be hit on the next request)'),
+    '#description'   => t('The default clearing action. The options are <em>remove</em> (which removes the item from the Akamai cache) and <em>invalidate</em> (which leaves the item in the cache, but invalidates it so that the origin will be hit on the next request.)'),
     '#required'      => TRUE,
   );
 
@@ -305,7 +305,7 @@ function akamai_settings_form_validate(&$form, &$form_state) {
     }
   }
 
-  // check if timeout value is an integer
+  // Check if timeout value is an integer.
   $filtered_akamai_timeout = filter_var(
     $form_state['values']['akamai_timeout'],
     FILTER_VALIDATE_INT,
@@ -326,7 +326,7 @@ function akamai_manual_purge_form() {
   $form['paths'] = array(
     '#type'        => 'textarea',
     '#title'       => t('Paths/URLs'),
-    '#description' => t('Enter one URL per line. URL entries should be relative to the basepath. (e.g. node/1, content/pretty-title, sites/default/files/some/image.png'),
+    '#description' => t('Enter one URL per line. Wildcards are not currently supported by v2 or v3 of the CCU REST API. URL entries should be relative to the basepath. (e.g. node/1, content/pretty-title, sites/default/files/some/image.png)'),
   );
 
   $form['domain_override'] = array(
@@ -337,7 +337,7 @@ function akamai_manual_purge_form() {
       CcuClientInterface::NETWORK_STAGING    => t('Staging'),
       CcuClientInterface::NETWORK_PRODUCTION => t('Production'),
     ),
-    '#description'   => t('The Akamai domain to use for cache clearing.  Defaults to the Domain setting from the settings page.')
+    '#description'   => t('The Akamai network to use for cache clearing. Defaults to the Domain setting from the settings page.')
   );
 
   $form['refresh'] = array(
@@ -364,7 +364,7 @@ function akamai_manual_purge_form() {
  */
 function akamai_manual_purge_form_submit($form, &$form_state) {
   // filter_xss() does not need to be used here as it turns the & symbol into
-  // an HTML entity and v3 rejects it. We don't need HTML entites here as this
+  // an HTML entity and v3 rejects it. We don't need HTML entities here as this
   // data won't be used in actual HTML, just API requests.
   $paths = explode("\n", $form_state['values']['paths']);
   $action = $form_state['values']['refresh'];
@@ -381,17 +381,17 @@ function akamai_manual_purge_form_submit($form, &$form_state) {
     if (is_object($result) && !empty($result->data)) {
       if ($akamai_response_data = json_decode($result->data)) {
         if (isset($akamai_response_data->httpStatus) && $akamai_response_data->httpStatus > 300) {
-          $message = t("There was a problem with your cache clearing request.  The error message returned was '@msg'",
+          $message = t("There was a problem with your purge request. The error message returned was '@msg'",
             array('@msg' => $akamai_response_data->details));
           $status = 'error';
         }
         else {
-          $message = t("Akamai Cache Request has been made successfully.  Akamai reports an estimated time to completion of @time",
+          $message = t("Purge request successful. Akamai reports an estimated time to completion of @time",
             array('@time' => format_interval($akamai_response_data->estimatedSeconds))) . theme("item_list", $paths);
         }
       }
       else {
-        $message = t('There was a problem with your cache clearing request. Please check the watchdog logs for details.');
+        $message = t('There was a problem with your purge request. Please check the watchdog logs for details.');
         $status = 'error';
 
         watchdog('akamai', 'Unable to parse Akamai API response data: @json_data',
@@ -400,7 +400,7 @@ function akamai_manual_purge_form_submit($form, &$form_state) {
     }
   }
   else {
-    $message = t('There was a problem with your cache clearing request. Please check the watchdog logs for details.');
+    $message = t('There was a problem with your purge request. Please check the watchdog logs for details.');
     $status = 'error';
   }
 
