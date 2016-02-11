@@ -380,8 +380,11 @@ function akamai_get_purge_paths($path, array $options) {
  * Gets the hostname for which purge requests will be issued.
  *
  * @param object $language
- *   An optional language object. If the option to use the language domain is
+ *   (optional) The language object. If the option to use the language domain is
  *   enabled, $language->domain will be used.
+ *
+ * @return string
+ *   Akamai hostname.
  */
 function akamai_get_hostname($language = NULL) {
   $language = empty($language) ? $GLOBALS['language_url'] : $language;
@@ -399,7 +402,7 @@ function akamai_get_hostname($language = NULL) {
  * @param array $paths
  *   An array of paths to be purged.
  *
- * @return mixed
+ * @return object|false
  *   If the request was accepted, a response object. Otherwise, FALSE.
  */
 function akamai_submit_purge_request($hostname, array $paths) {
@@ -513,6 +516,9 @@ function akamai_purge_entity($entity_type, $entity) {
  *
  * @return mixed
  *   A response object if the purge request was accepted, FALSE otherwise.
+ *
+ * @deprecated Deprecated in 7.x-3.0.
+ * @see akamai_purge_path()
  */
 function akamai_clear_url($paths_in, $params = [], $node = NULL) {
   if (variable_get('akamai_disabled', FALSE)) {

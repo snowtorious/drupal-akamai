@@ -44,7 +44,8 @@ class Ccu3Client extends BaseCcuClient implements CcuClientInterface {
       'hostname' => $hostname,
       'objects' => array_unique($paths),
     );
-    // Force a non-associative array for json_encode().
+    // Ensure a non-associative array for json_encode() so it will output an
+    // array instead of an object.
     $purge_body['objects'] = array_values($purge_body['objects']);
 
     // Use JSON_UNESCAPED_SLASHES to reduce amount of data in request body.
