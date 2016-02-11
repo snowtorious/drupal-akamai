@@ -133,7 +133,7 @@ function akamai_settings_form() {
     '#type'          => 'textfield',
     '#title'         => t('Base URL'),
     '#default_value' => variable_get('akamai_base_uri', ''),
-    '#description'   => t('Should be in for format of %uri', array('%uri' => 'https://akaa-xxxxxxxxxxxxxxxx-xxxxxxxxxxxxxxxx.luna.akamaiapis.net/')),
+    '#description'   => t('Should be in format of %url', array('%url' => 'https://akaa-xxxxxxxxxxxxxxxx-xxxxxxxxxxxxxxxx.luna.akamaiapis.net/')),
     '#states' => $database_field_states,
     '#element_validate' => array(
       'akamai_settings_form_validate_credential_field',
