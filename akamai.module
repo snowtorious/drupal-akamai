@@ -62,7 +62,7 @@ function akamai_menu() {
     'title' => 'Cache Control Utility',
     'description' => 'Admin interface to flush Drupal resources from the Akamai cache',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('akamai_cache_control'),
+    'page arguments' => array('akamai_manual_purge_form'),
     'access arguments' => array('purge akamai cache'),
     'file' => 'akamai.admin.inc',
     'type' => MENU_LOCAL_TASK,

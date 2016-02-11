@@ -316,9 +316,11 @@ function akamai_settings_form_validate(&$form, &$form_state) {
 }
 
 /**
- * General cache clearing page.
+ * Form builder for manually purging Akamai.
+ *
+ * @see akamai_manual_purge_form_submit().
  */
-function akamai_cache_control() {
+function akamai_manual_purge_form() {
   $form = array();
 
   $form['paths'] = array(
@@ -357,13 +359,10 @@ function akamai_cache_control() {
   return $form;
 }
 
-
 /**
- * Submit handler for akamai_cache_control().
- *
- * Process the settings and submit to Akamai
+ * Form submission handler for akamai_manual_purge_form().
  */
-function akamai_cache_control_submit($form, &$form_state) {
+function akamai_manual_purge_form_submit($form, &$form_state) {
   // filter_xss() does not need to be used here as it turns the & symbol into
   // an HTML entity and v3 rejects it. We don't need HTML entites here as this
   // data won't be used in actual HTML, just API requests.
