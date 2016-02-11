@@ -9,7 +9,8 @@
 
 namespace Drupal\akamai;
 
-use \Drupal\akamai\Batch;
+use Drupal\akamai\Batch;
+use InvalidArgumentException;
 
 class Batcher {
 

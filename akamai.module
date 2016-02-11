@@ -487,20 +487,6 @@ function akamai_cron() {
 }
 
 /**
- * Submits a batch of queued purge request items to the CCU API.
- */
-function akamai_submit_batch(\Drupal\akamai\Batch $batch) {
-  try {
-    akamai_submit_purge_request($batch->getHostname(), $batch->getPaths());
-    return TRUE;
-  }
-  catch (Exception $e) {
-    watchdog_exception('akamai', $e);
-  }
-  return FALSE;
-}
-
-/**
  * Purges an entity's path from Akamai's cache.
  */
 function akamai_purge_entity($entity_type, $entity) {

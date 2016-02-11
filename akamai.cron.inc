@@ -18,15 +18,20 @@ function akamai_cron_process_queue() {
   $batcher = new \Drupal\akamai\Batcher($client, $batch_size);
 
   while (time() < $end && ($item = $queue->claimItem())) {
-    $batcher->insertItem($item);
+    try {
+      $batcher->insertItem($item);
+    }
+    catch (Exception $e) {
+      watchdog_exception('akamai', $e);
+    }
   }
 
   // Submit at least one batch.
   // Continue submitting batches until time limit is reached.
   while (!$batcher->isEmpty()) {
     $batch = $batcher->getBatch();
-    $success = akamai_submit_batch($batch);
-    if ($success || !variable_get('akamai_queue_on_failure', TRUE)) {
+    $response = akamai_submit_batch($batch);
+    if (!empty($response) || !variable_get('akamai_queue_on_failure', TRUE)) {
       foreach ($batch->getItems() as $item) {
         $queue->deleteItem($item);
       }
@@ -49,6 +54,19 @@ function akamai_cron_process_queue() {
       $queue->releaseItem($item);
     }
   }
+}
+
+/**
+ * Submits a batch of queued purge request items to the CCU API.
+ */
+function akamai_submit_batch(\Drupal\akamai\Batch $batch) {
+  try {
+    return akamai_submit_purge_request($batch->getHostname(), $batch->getPaths());
+  }
+  catch (Exception $e) {
+    watchdog_exception('akamai', $e);
+  }
+  return FALSE;
 }
 
 /**
