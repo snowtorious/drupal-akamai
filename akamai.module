@@ -269,6 +269,9 @@ function akamai_purge_path($path, array $options = array()) {
   if (empty($options['hostname'])) {
     $hostname = akamai_get_hostname($language);
   }
+  else {
+    $hostname = $options['hostname'];
+  }
 
   $paths = akamai_get_purge_paths($path, $options);
 
