@@ -330,7 +330,7 @@ function akamai_manual_purge_form() {
 
   $form['domain_override'] = array(
     '#type'          => 'select',
-    '#title'         => t('Domain'),
+    '#title'         => t('Network'),
     '#default_value' => variable_get('akamai_network', CcuClientInterface::NETWORK_PRODUCTION),
     '#options'       => array(
       CcuClientInterface::NETWORK_STAGING    => t('Staging'),
