@@ -37,8 +37,10 @@ class Batch {
    * @param int $max_size
    *   The maximum number of items allowed in the batch.
    */
-  public function __construct($max_size) {
-    $this->maxSize = $max_size;
+  public function __construct($max_size = NULL) {
+    if (is_int($max_size)) {
+      $this->maxSize = $max_size;
+    }
   }
 
   /**
@@ -55,7 +57,7 @@ class Batch {
     if (empty($this->hostname)) {
       $this->hostname = $item->data['hostname'];
     }
-    elseif ($item->data['hostname'] != current($this->items)->data['hostname']) {
+    elseif ($item->data['hostname'] != $this->hostname) {
       throw new InvalidArgumentException('All items in a batch must have the same hostname.');
     }
     $this->items[] = $item;
