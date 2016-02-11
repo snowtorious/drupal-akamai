@@ -367,12 +367,8 @@ function akamai_manual_purge_form_submit($form, &$form_state) {
   // data won't be used in actual HTML, just API requests.
   $paths = explode("\n", $form_state['values']['paths']);
 
-  $overrides = array(
-    'action' => $form_state['values']['refresh'],
-    'domain' => $form_state['values']['domain_override']
-  );
-
-  if ($result = akamai_clear_url($paths, $overrides)) {
+  $host = variable_get('akamai_hostname', '');
+  if ($result = akamai_purge_paths($paths, $host)) {
     $message = t("Akamai Cache Request has been made successfully.") . theme("item_list", $paths);
     $status = 'status';
 
