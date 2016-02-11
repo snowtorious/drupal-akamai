@@ -1,7 +1,8 @@
 <?php
+
 /**
  * @file
- * Integration with the Akamai CDN Cache Control Web Service.
+ * Integration with Akamai CDN CCU API.
  *
  * Akamai is a registered trademark of Akamai Technologies, Inc.
  */
@@ -27,7 +28,7 @@ define('AKAMAI_PURGE_REQUEST_HOURS_TO_KEEP_DEFAULT', 72);
 function akamai_permission() {
   return array(
     'administer akamai' => array(
-      'description' => t('Configure the Akamai integration settings. Username, password, etc.'),
+      'description' => t('Configure the Akamai CDN settings. Username, password, etc.'),
       'title' => t('Administer Akamai Settings'),
     ),
     'purge akamai cache' => array(
@@ -45,7 +46,7 @@ function akamai_menu() {
 
   $items['admin/config/system/akamai'] = array(
     'title' => 'Akamai',
-    'description' => 'Akamai integration settings and cache clearing utility',
+    'description' => 'Akamai CDN settings.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('akamai_settings_form'),
     'access arguments' => array('administer akamai'),
