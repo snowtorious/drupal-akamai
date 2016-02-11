@@ -461,14 +461,14 @@ function akamai_purge_request_list() {
   $rows = [];
 
   foreach ($requests as $request) {
-    $submission_interval = format_interval(REQUEST_TIME - $request->submission_time);
+    $submission_interval = format_interval(REQUEST_TIME - $request->submission_time, 1);
     $submission_string = t('@interval ago', ['@interval' => $submission_interval]);
 
     if (empty($request->completion_time)) {
       $completed_string = '';
     }
     else {
-      $completed_interval = format_interval(REQUEST_TIME - $request->completion_time);
+      $completed_interval = format_interval(REQUEST_TIME - $request->completion_time, 1);
       $completed_string = t('@interval ago', ['@interval' => $completed_interval]);
     }
     $rows[] = [
