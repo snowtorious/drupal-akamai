@@ -340,7 +340,7 @@ function akamai_manual_purge_form() {
     '#description'   => t('The Akamai network to use for cache purging. Defaults to the Domain setting from the settings page.')
   );
 
-  $form['refresh'] = array(
+  $form['purge_action'] = array(
     '#type'        => 'radios',
     '#title'       => t('Purge action'),
     '#default_value' => variable_get('akamai_action', ''),
@@ -353,7 +353,7 @@ function akamai_manual_purge_form() {
 
   $form['submit'] = array(
     '#type'  => 'submit',
-    '#value' => t('Start Refreshing Content'),
+    '#value' => t('Start Purging Content'),
   );
 
   return $form;

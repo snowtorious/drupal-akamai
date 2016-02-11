@@ -58,9 +58,10 @@ function akamai_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
   );
 
-  $items['admin/config/system/akamai/refresh'] = array(
-    'title' => 'Cache Control Utility',
-    'description' => 'Admin interface to flush Drupal resources from the Akamai cache',
+  $items['admin/config/system/akamai/purge'] = array(
+    'title' => 'Manual Purge (CCU)',
+    'description' => 'Admin interface to manually purge URLs from Akamai via
+      the Content Control Utility (CCU) API.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('akamai_manual_purge_form'),
     'access arguments' => array('purge akamai cache'),
