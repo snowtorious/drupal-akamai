@@ -123,6 +123,12 @@ function akamai_update_7002() {
 function akamai_update_7300() {
   // The `akamai_domain` varable was renamed to `akamai_network`.
   variable_set('akamai_network', variable_get('akamai_domain', 'production'));
+  variable_del('akamai_domain');
+  variable_del('akamai_service_class');
+  variable_del('akamai_username');
+  variable_del('akamai_password');
+  variable_del('akamai_restapi');
+  variable_del('akamai_basepath');
   drupal_install_schema('akamai');
 }
 
@@ -131,12 +137,8 @@ function akamai_update_7300() {
  */
 function akamai_uninstall() {
   variable_del('akamai_action');
-  variable_del('akamai_basepath');
   variable_del('akamai_network');
-  variable_del('akamai_password');
-  variable_del('akamai_restapi');
   variable_del('akamai_timeout');
-  variable_del('akamai_username');
   variable_del('akamai_disabled');
   variable_del('akamai_credential_storage');
   variable_del('akamai_base_uri');

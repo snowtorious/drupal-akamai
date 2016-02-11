@@ -554,7 +554,7 @@ function akamai_clear_url($paths_in, $params = [], $node = NULL) {
   $paths = array_unique($paths);
 
   $default_params = array(
-    'basepath'  => variable_get("akamai_basepath", akamai_get_hostname()),
+    'basepath'  => akamai_get_hostname(),
     'action'    => variable_get("akamai_action", "invalidate"),
     'domain'    => variable_get("akamai_network", ""),
   );
