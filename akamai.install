@@ -140,6 +140,8 @@ function akamai_uninstall() {
   variable_del('akamai_network');
   variable_del('akamai_timeout');
   variable_del('akamai_disabled');
+  variable_del('akamai_hostname');
+  variable_del('akamai_use_language_domain');
   variable_del('akamai_credential_storage');
   variable_del('akamai_base_uri');
   variable_del('akamai_access_token');
@@ -149,7 +151,10 @@ function akamai_uninstall() {
   variable_del('akamai_edgerc_section');
   variable_del('akamai_queue_purge_requests');
   variable_del('akamai_queue_on_failure');
+  variable_del('akamai_batch_size');
   variable_del('akamai_cron_queue_time_limit');
   variable_del('akamai_purge_status_time_limit');
   variable_del('akamai_purge_log_duration_complete');
+  variable_del('akamai_purge_log_duration_incomplete');
+  variable_del('akamai_ccu_version');
 }
