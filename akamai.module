@@ -12,6 +12,16 @@
 define('AKAMAI_CRON_QUEUE_TIME_LIMIT_DEFAULT', 15);
 
 /**
+ * Default number of seconds to spend checking status of pending purge requests.
+ */
+define('AKAMAI_PURGE_STATUS_TIME_LIMIT_DEFAULT', 15);
+
+/**
+ * Default number of hours to keep purge request data.
+ */
+define('AKAMAI_PURGE_REQUEST_HOURS_TO_KEEP_DEFAULT', 72);
+
+/**
  * Implements hook_perm().
  */
 function akamai_permission() {
@@ -56,6 +66,23 @@ function akamai_menu() {
     'access arguments' => array('purge akamai cache'),
     'file' => 'akamai.admin.inc',
     'type' => MENU_LOCAL_TASK,
+  );
+
+  $items['admin/reports/akamai'] = array(
+    'title' => 'Akamai purge requests',
+    'description' => 'Provides status of purge requests.',
+    'page callback' => 'akamai_purge_request_list',
+    'access arguments' => array('purge akamai cache'),
+    'file' => 'akamai.admin.inc',
+  );
+
+  $items['admin/reports/akamai/%'] = array(
+    'title' => 'Akamai purge requests',
+    'description' => 'Provides information about an individual purge request.',
+    'page callback' => 'akamai_purge_request_detail',
+    'page arguments' => array(3),
+    'access arguments' => array('purge akamai cache'),
+    'file' => 'akamai.admin.inc',
   );
 
   return $items;
@@ -378,13 +405,56 @@ function akamai_submit_purge_request($hostname, array $paths) {
   try {
     $ccu = akamai_get_client();
     $response = $ccu->postPurgeRequest($hostname, $paths);
-    return $response;
+    if (!empty($response)) {
+      akamai_log_purge_request($hostname, $paths, $response);
+      return $response;
+    }
+  }
+  catch (GuzzleHttp\Exception\RequestException $e) {
+    watchdog_exception('akamai', $e);
+
+    $request = $e->getRequest();
+    $request_variables = [
+      '@method' => $request->getMethod(),
+      '@uri'    => $request->getUri(),
+      '@body'   => $request->getBody()->getContents(),
+    ];
+    watchdog('akamai', 'Request: @method @uri @body', $request_variables, WATCHDOG_ERROR);
+
+    if ($e->hasResponse()) {
+      $response_body = $e->getResponse()->getBody()->getContents();
+      watchdog('akamai', 'Response: @response', ['@response' => $response_body], WATCHDOG_ERROR);
+    }
   }
   catch (Exception $e) {
-    $response = $e->getResponse();
-    if (!empty($response)) {
-      watchdog('akamai', 'Response: ' . '<pre>' . $response->getBody()->getContents() . '</pre>');
-    }
+    watchdog_exception('akamai', $e);
+  }
+
+  return FALSE;
+}
+
+/**
+ * Logs the purge request for reporting and progress tracking.
+ */
+function akamai_log_purge_request($hostname, $paths, $response) {
+  try {
+    $time = time();
+    $is_fast_purge = empty($response->progressUri);
+    $record = [
+      'purge_id' => $response->purgeId,
+      'support_id' => $response->supportId,
+      'estimated_seconds' => $response->estimatedSeconds,
+      'check_after' => $is_fast_purge ? NULL : $time + $response->pingAfterSeconds,
+      'submission_time' => $time,
+      'status' => $response->detail,
+      'progress_uri' => $is_fast_purge ? NULL : $response->progressUri,
+      'completion_time' => $is_fast_purge ? $time + $response->estimatedSeconds : NULL,
+      'hostname' => $hostname,
+      'paths' => array_unique($paths),
+    ];
+    return drupal_write_record('akamai_purge_requests', $record);
+  }
+  catch (Exception $e) {
     watchdog_exception('akamai', $e);
     return FALSE;
   }
@@ -411,46 +481,9 @@ function akamai_cron() {
     watchdog('akamai', 'Akamai cron task skipped because purging is disabled. Check module settings.');
     return;
   }
-
-  $end = time() + variable_get('akamai_cron_queue_time_limit', AKAMAI_CRON_QUEUE_TIME_LIMIT_DEFAULT);
-  $queue = DrupalQueue::get('akamai_ccu');
-  $client = akamai_get_client();
-  $batch_size = variable_get('akamai_batch_size', NULL);
-  $batcher = new \Drupal\akamai\Batcher($client, $batch_size);
-
-  while (time() < $end && ($item = $queue->claimItem())) {
-    $batcher->insertItem($item);
-  }
-
-  // Submit at least one batch.
-  // Continue submitting batches until time limit is reached.
-  while (!$batcher->isEmpty()) {
-    $batch = $batcher->getBatch();
-    $success = akamai_submit_batch($batch);
-    if ($success || !variable_get('akamai_queue_on_failure', TRUE)) {
-      foreach ($batch->getItems() as $item) {
-        $queue->deleteItem($item);
-      }
-    }
-    else {
-      foreach ($batch->getItems() as $item) {
-        $queue->releaseItem($item);
-      }
-    }
-
-    if (time() > $end) {
-      break;
-    }
-  }
-
-  // Release any items that didn't make it into a batch.
-  if (!$batcher->isEmpty()) {
-    $unsubmitted_items = $batcher->getItems();
-    foreach ($unsubmitted_items as $item) {
-      $queue->releaseItem($item);
-    }
-  }
-
+  module_load_include('inc', 'akamai', 'akamai.cron');
+  akamai_cron_process_queue();
+  akamai_cron_check_status();
 }
 
 /**

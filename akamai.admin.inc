@@ -27,23 +27,23 @@ function akamai_settings() {
     '#default_value' => variable_get('akamai_disabled', FALSE),
   );
 
-  $form['queue'] = array(
+  $form['cron'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Purge request queue'),
+    '#title' => t('Cron tasks'),
   );
-  $form['queue']['akamai_queue_purge_requests'] = array(
+  $form['cron']['akamai_queue_purge_requests'] = array(
     '#type'          => 'checkbox',
     '#title'         => t('Enable queueing of purge requests'),
     '#default_value' => variable_get('akamai_queue_purge_requests', FALSE),
     '#description'   => t('If enabled, purge requests will be queued and submitted when cron runs.'),
   );
-  $form['queue']['akamai_queue_on_failure'] = array(
+  $form['cron']['akamai_queue_on_failure'] = array(
     '#type'          => 'checkbox',
     '#title'         => t('Queue failed purge requests'),
     '#default_value' => variable_get('akamai_queue_on_failure', TRUE),
     '#description'   => t('If a purge request fails, the paths will be added to the queue and re-submitted when cron runs.'),
   );
-  $form['queue']['akamai_cron_queue_time_limit'] = array(
+  $form['cron']['akamai_cron_queue_time_limit'] = array(
     '#type'          => 'textfield',
     '#title'         => t('Cron time limit'),
     '#description'   => t("Items in the queue will stop being processed if this time limit is reached."),
@@ -52,6 +52,26 @@ function akamai_settings() {
     '#field_suffix'  => t('seconds'),
     '#default_value' => variable_get('akamai_cron_queue_time_limit', AKAMAI_CRON_QUEUE_TIME_LIMIT_DEFAULT),
     '#required'      => TRUE,
+  );
+  $form['cron']['akamai_purge_log_duration_complete'] = array(
+    '#type'          => 'textfield',
+    '#title'         => t('How long should information about completed purge requests be kept?'),
+    '#size'          => 5,
+    '#maxlength'     => 4,
+    '#field_suffix'  => t('hours'),
+    '#default_value' => variable_get('akamai_purge_log_duration_complete', AKAMAI_PURGE_REQUEST_HOURS_TO_KEEP_DEFAULT),
+    '#required'      => TRUE,
+    '#description'   => t('Set to 0 to keep indefinitely.'),
+  );
+  $form['cron']['akamai_purge_log_duration_incomplete'] = array(
+    '#type'          => 'textfield',
+    '#title'         => t('How long should information about pending purge requests be kept?'),
+    '#size'          => 5,
+    '#maxlength'     => 4,
+    '#field_suffix'  => t('hours'),
+    '#default_value' => variable_get('akamai_purge_log_duration_incomplete', AKAMAI_PURGE_REQUEST_HOURS_TO_KEEP_DEFAULT),
+    '#required'      => TRUE,
+    '#description'   => t('Set to 0 to keep indefinitely.'),
   );
 
   $form['credentials'] = array(
@@ -379,3 +399,175 @@ function akamai_cache_control_submit($form, &$form_state) {
   drupal_set_message($message, $status);
 }
 
+/**
+ * Displays information about submitted purge requests.
+ */
+function akamai_purge_request_list() {
+  $header = [
+    [
+      'data' => t('ID'),
+    ],
+    [
+      'data' => t('Hostname'),
+      'field' => 'hostname',
+    ],
+    [
+      'data' => t('Paths'),
+    ],
+    [
+      'data' => t('Status'),
+      'field' => 'status',
+    ],
+    [
+      'data' => t('Submission time'),
+      'field' => 'submission_time',
+      'sort' => 'DESC',
+    ],
+    [
+      'data' => t('Estimated completion time'),
+      'field' => 'check_after',
+    ],
+    [
+      'data' => t('Completed'),
+      'field' => 'completion_time',
+    ],
+  ];
+
+  $query = db_select('akamai_purge_requests', 'pr')->extend('PagerDefault')->extend('TableSort')
+    ->fields('pr', [
+      'purge_id',
+      'estimated_seconds',
+      'check_after',
+      'status',
+      'submission_time',
+      'completion_time',
+      'hostname',
+      'paths',
+    ])
+    ->limit(50)
+    ->orderByHeader($header)
+    ->orderBy('submission_time', 'DESC');
+  $requests = $query->execute()->fetchAll();
+
+  $rows = [];
+
+  foreach ($requests as $request) {
+    $submission_interval = format_interval(REQUEST_TIME - $request->submission_time);
+    $submission_string = t('@interval ago', ['@interval' => $submission_interval]);
+
+    if (empty($request->completion_time)) {
+      $completed_string = '';
+    }
+    else {
+      $completed_interval = format_interval(REQUEST_TIME - $request->completion_time);
+      $completed_string = t('@interval ago', ['@interval' => $completed_interval]);
+    }
+    $rows[] = [
+      l($request->purge_id, 'admin/reports/akamai/' . $request->purge_id),
+      check_plain($request->hostname),
+      count(unserialize($request->paths)),
+      check_plain($request->status),
+      $submission_string,
+      _akamai_get_estimated_completion_string($request),
+      $completed_string,
+    ];
+  }
+
+  $build = [];
+  $build['table'] = [
+    '#theme' => 'table',
+    '#header' => $header,
+    '#rows' => $rows,
+    '#empty' => $empty,
+  ];
+  $build['pager'] = ['#theme' => 'pager'];
+  return $build;
+}
+
+/**
+ * Presents information about a purge request.
+ */
+function akamai_purge_request_detail($id) {
+  $query = db_select('akamai_purge_requests', 'pr')
+    ->fields('pr')
+    ->condition('purge_id', $id);
+  $request = $query->execute()->fetchObject();
+
+  if (empty($request)) {
+    drupal_not_found();
+    return;
+  }
+
+  $rows = [
+    [
+      ['data' => t('Status'), 'header' => TRUE],
+      check_plain($request->status),
+    ],
+    [
+      ['data' => t('Hostname'), 'header' => TRUE],
+      check_plain($request->hostname),
+    ],
+    [
+      ['data' => t('Paths'), 'header' => TRUE],
+      theme('item_list', ['items' => unserialize($request->paths)]),
+    ],
+    [
+      ['data' => t('ID'), 'header' => TRUE],
+      check_plain($request->purge_id),
+    ],
+    [
+      ['data' => t('Support ID'), 'header' => TRUE],
+      check_plain($request->support_id),
+    ],
+    [
+      ['data' => t('Progress URI'), 'header' => TRUE],
+      check_plain($request->progress_uri),
+    ],
+    [
+      ['data' => t('Submission time'), 'header' => TRUE],
+      format_date($request->submission_time, 'long'),
+    ],
+    [
+      ['data' => t('Estimated completion time'), 'header' => TRUE],
+      _akamai_get_estimated_completion_string($request),
+    ],
+    [
+      ['data' => t('Last checked'), 'header' => TRUE],
+      empty($request->last_checked) ? '' : t('@interval ago', ['@interval' => format_interval(REQUEST_TIME - $request->last_checked)]),
+    ],
+  ];
+
+  if (!empty($request->completion_time)) {
+    $rows[] = [
+      ['data' => t('Completion time'), 'header' => TRUE],
+      empty($request->completion_time) ? '' : format_date($request->completion_time, 'long'),
+    ];
+    $rows[] = [
+      ['data' => t('Time to complete'), 'header' => TRUE],
+      format_interval($request->completion_time - $request->submission_time),
+    ];
+  }
+
+  $build['table'] = [
+    '#theme' => 'table',
+    '#rows' => $rows,
+  ];
+  return $build;
+}
+
+/**
+ * Generates a user-friendly string for the estimated completion time.
+ */
+function _akamai_get_estimated_completion_string($request) {
+  $interval = format_interval(abs($request->check_after - REQUEST_TIME));
+  if (!empty($request->completion_time)) {
+    $string = t('Confirmed complete.');
+  }
+  elseif (REQUEST_TIME > $request->check_after) {
+    $string = t('@interval ago', ['@interval' => $interval]);
+  }
+  else {
+    $string = t('@interval from now', ['@interval' => $interval]);
+  }
+  return $string;
+}
