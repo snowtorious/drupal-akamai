@@ -10,9 +10,9 @@ use Akamai\Open\EdgeGrid\Client as EdgeGridClient;
 use Drupal\akamai\CcuClientInterface;
 
 /**
- * General Settings for Akamai
+ * Form builder to manage Akamai settings.
  */
-function akamai_settings() {
+function akamai_settings_form() {
   $form = array();
 
   $form['disable_fieldset'] = array(
@@ -136,8 +136,8 @@ function akamai_settings() {
     '#description'   => t('Should be in for format of %uri', array('%uri' => 'https://akaa-xxxxxxxxxxxxxxxx-xxxxxxxxxxxxxxxx.luna.akamaiapis.net/')),
     '#states' => $database_field_states,
     '#element_validate' => array(
-      'akamai_settings_validate_credential_field',
-      'akamai_settings_validate_url',
+      'akamai_settings_form_validate_credential_field',
+      'akamai_settings_form_validate_url',
     ),
     '#akamai_credential_type' => 'database',
   );
@@ -147,7 +147,7 @@ function akamai_settings() {
     '#default_value' => variable_get('akamai_access_token', ''),
     '#description'   => t('Should be in for format of %token', array('%token' => 'akab-xxxxxxxxxxxxxxxx-xxxxxxxxxxxxxxxx')),
     '#states' => $database_field_states,
-    '#element_validate' => array('akamai_settings_validate_credential_field'),
+    '#element_validate' => array('akamai_settings_form_validate_credential_field'),
     '#akamai_credential_type' => 'database',
   );
   $form['credentials']['akamai_client_token'] = array(
@@ -156,7 +156,7 @@ function akamai_settings() {
     '#default_value' => variable_get('akamai_client_token', ''),
     '#description'   => t('Should be in for format of %token', array('%token' => 'akab-xxxxxxxxxxxxxxxx-xxxxxxxxxxxxxxxx')),
     '#states' => $database_field_states,
-    '#element_validate' => array('akamai_settings_validate_credential_field'),
+    '#element_validate' => array('akamai_settings_form_validate_credential_field'),
     '#akamai_credential_type' => 'database',
   );
   $form['credentials']['akamai_client_secret'] = array(
@@ -164,7 +164,7 @@ function akamai_settings() {
     '#title'         => t('Client secret'),
     '#default_value' => variable_get('akamai_client_secret', ''),
     '#states' => $database_field_states,
-    '#element_validate' => array('akamai_settings_validate_credential_field'),
+    '#element_validate' => array('akamai_settings_form_validate_credential_field'),
     '#akamai_credential_type' => 'database',
   );
   $form['credentials']['akamai_edgerc_path'] = array(
@@ -173,9 +173,9 @@ function akamai_settings() {
     '#default_value' => variable_get('akamai_edgerc_path', ''),
     '#states' => $file_field_states,
     '#element_validate' => array(
-      'akamai_settings_validate_credential_field',
-      'akamai_settings_validate_file_exists',
-      'akamai_settings_validate_file_is_readable',
+      'akamai_settings_form_validate_credential_field',
+      'akamai_settings_form_validate_file_exists',
+      'akamai_settings_form_validate_file_is_readable',
     ),
     '#akamai_credential_type' => 'file',
   );
@@ -184,7 +184,7 @@ function akamai_settings() {
     '#title'         => t('Section of .edgerc file to use for the CCU API'),
     '#default_value' => variable_get('akamai_edgerc_section', 'default'),
     '#states' => $file_field_states,
-    '#element_validate' => array('akamai_settings_validate_credential_field'),
+    '#element_validate' => array('akamai_settings_form_validate_credential_field'),
     '#akamai_credential_type' => 'file',
   );
 
@@ -245,7 +245,7 @@ function akamai_settings() {
 /**
  * Sets an error if required credential fields are not filled in.
  */
-function akamai_settings_validate_credential_field(&$element, &$form_state, $form) {
+function akamai_settings_form_validate_credential_field(&$element, &$form_state, $form) {
   $storage_type = $element['#akamai_credential_type'];
   $is_required = ($form_state['values']['akamai_credential_storage'] == $storage_type);
   $value = $form_state['values'][$element['#name']];
@@ -262,7 +262,7 @@ function akamai_settings_validate_credential_field(&$element, &$form_state, $for
 /**
  * Sets an error if the form element's value is not a valid absolute URL.
  */
-function akamai_settings_validate_url($element, &$form_state, $form) {
+function akamai_settings_form_validate_url($element, &$form_state, $form) {
   $url = $form_state['values'][$element['#name']];
   if (!empty($url) && !valid_url($element['#value'], TRUE)) {
     form_error($element, t('The !name field must be a valid, absolute URL.', array('!name' => $element['#title'])));
@@ -272,7 +272,7 @@ function akamai_settings_validate_url($element, &$form_state, $form) {
 /**
  * Sets an error if the form element's value is not a path to an existing file.
  */
-function akamai_settings_validate_file_exists($element, &$form_state, $form) {
+function akamai_settings_form_validate_file_exists($element, &$form_state, $form) {
   $path = $form_state['values'][$element['#name']];
   if (!empty($path) && !file_exists($path)) {
     form_error($element, t('Could not find the .edgerc file at %path. Please verify that it exists.', array('%path' => $path)));
@@ -282,7 +282,7 @@ function akamai_settings_validate_file_exists($element, &$form_state, $form) {
 /**
  * Sets an error if the form element's value is not a path to a readable file.
  */
-function akamai_settings_validate_file_is_readable($element, &$form_state, $form) {
+function akamai_settings_form_validate_file_is_readable($element, &$form_state, $form) {
   $path = $form_state['values'][$element['#name']];
   if (!empty($path) && !is_readable($path)) {
     form_error($element, t('Could not read the file at %path. Please verify that it is readable.', array('%path' => $path)));
@@ -290,9 +290,9 @@ function akamai_settings_validate_file_is_readable($element, &$form_state, $form
 }
 
 /**
- * Validate the akamai_settings form.
+ * Form Validation handler for akamai_settings_form().
  */
-function akamai_settings_validate(&$form, &$form_state) {
+function akamai_settings_form_validate(&$form, &$form_state) {
   // Validate .edgerc file.
   if ($form_state['values']['akamai_credential_storage'] == 'file') {
     $section = $form_state['values']['akamai_edgerc_section'];

@@ -47,7 +47,7 @@ function akamai_menu() {
     'title' => 'Akamai',
     'description' => 'Akamai integration settings and cache clearing utility',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('akamai_settings'),
+    'page arguments' => array('akamai_settings_form'),
     'access arguments' => array('administer akamai'),
     'file' => 'akamai.admin.inc',
   );
