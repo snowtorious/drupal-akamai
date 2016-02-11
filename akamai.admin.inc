@@ -369,7 +369,8 @@ function akamai_manual_purge_form_submit($form, &$form_state) {
 
   $host = variable_get('akamai_hostname', '');
   if ($result = akamai_purge_paths($paths, $host)) {
-    $message = t("Akamai Cache Request has been made successfully.") . theme("item_list", $paths);
+    $paths['items'] = $paths;
+    $message = t("Akamai purge request successful. The estimated completion time is @estimated_seconds seconds and the list of URLs submitted are:", array('@estimated_seconds' => $result->estimatedSeconds)) . theme("item_list", $paths);
     $status = 'status';
 
     // @todo Overhaul the $akamai_response_data logic, it is currently expecting
