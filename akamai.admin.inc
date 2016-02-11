@@ -29,6 +29,7 @@ function akamai_settings() {
 
   $form['cron'] = array(
     '#type' => 'fieldset',
+    '#collapsible' => TRUE,
     '#title' => t('Cron tasks'),
   );
   $form['cron']['akamai_queue_purge_requests'] = array(
@@ -42,6 +43,14 @@ function akamai_settings() {
     '#title'         => t('Queue failed purge requests'),
     '#default_value' => variable_get('akamai_queue_on_failure', TRUE),
     '#description'   => t('If a purge request fails, the paths will be added to the queue and re-submitted when cron runs.'),
+  );
+  $form['cron']['akamai_batch_size'] = array(
+    '#type'          => 'textfield',
+    '#title'         => t('Batch size'),
+    '#default_value' => variable_get('akamai_batch_size', 0),
+    '#size'          => 7,
+    '#maxlength'     => 6,
+    '#description'   => t("The number of queued items to submit in each batch. Set to 0 for no limit, in which case the batch size will be limited by the CCU API request body limit of 50,000 bytes."),
   );
   $form['cron']['akamai_cron_queue_time_limit'] = array(
     '#type'          => 'textfield',
