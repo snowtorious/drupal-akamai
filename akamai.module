@@ -417,7 +417,7 @@ function akamai_submit_purge_request($hostname, array $paths) {
     $request_variables = [
       '@method' => $request->getMethod(),
       '@uri'    => $request->getUri(),
-      '@body'   => $request->getBody()->getContents(),
+      '@body'   => (string) $request->getBody(),
     ];
     watchdog('akamai', 'Request: @method @uri @body', $request_variables, WATCHDOG_ERROR);
 
