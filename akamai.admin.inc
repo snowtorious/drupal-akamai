@@ -23,7 +23,7 @@ function akamai_settings_form() {
 
   $form['disable_fieldset']['akamai_disabled'] = array(
     '#type'          => 'checkbox',
-    '#title'         => t('Disable cache clearing'),
+    '#title'         => t('Disable cache purging'),
     '#default_value' => variable_get('akamai_disabled', FALSE),
   );
 
@@ -208,7 +208,7 @@ function akamai_settings_form() {
   $form['akamai_timeout'] = array(
     '#type'          => 'textfield',
     '#title'         => t('Timeout length'),
-    '#description'   => t("The timeout used by when sending the cache clear request to Akamai's servers. Most users will not need to change this value."),
+    '#description'   => t("The timeout used by when sending the cache purge request to Akamai's servers. Most users will not need to change this value."),
     '#size'          => 5,
     '#maxlength'     => 3,
     '#default_value' => variable_get('akamai_timeout', EdgeGridClient::DEFAULT_REQUEST_TIMEOUT),
@@ -223,19 +223,19 @@ function akamai_settings_form() {
       CcuClientInterface::NETWORK_STAGING    => t('Staging'),
       CcuClientInterface::NETWORK_PRODUCTION => t('Production'),
     ),
-    '#description'   => t('The Akamai network to use for cache clearing.'),
+    '#description'   => t('The Akamai network to use for cache purge requests.'),
     '#required'      => TRUE,
   );
 
   $form['akamai_action'] = array(
     '#type'          => 'radios',
-    '#title'         => t('Clearing action type default'),
+    '#title'         => t('Purge action'),
     '#default_value' => variable_get('akamai_action', 'invalidate'),
     '#options'       => array(
       'remove'     => t('Remove'),
       'invalidate' => t('Invalidate'),
     ),
-    '#description'   => t('The default clearing action. The options are <em>remove</em> (which removes the item from the Akamai cache) and <em>invalidate</em> (which leaves the item in the cache, but invalidates it so that the origin will be hit on the next request.)'),
+    '#description'   => t('The default purging action. The options are <em>remove</em> (which removes the item from the Akamai cache) and <em>invalidate</em> (which leaves the item in the cache, but invalidates it so that the origin will be hit on the next request.)'),
     '#required'      => TRUE,
   );
 
@@ -337,12 +337,12 @@ function akamai_manual_purge_form() {
       CcuClientInterface::NETWORK_STAGING    => t('Staging'),
       CcuClientInterface::NETWORK_PRODUCTION => t('Production'),
     ),
-    '#description'   => t('The Akamai network to use for cache clearing. Defaults to the Domain setting from the settings page.')
+    '#description'   => t('The Akamai network to use for cache purging. Defaults to the Domain setting from the settings page.')
   );
 
   $form['refresh'] = array(
     '#type'        => 'radios',
-    '#title'       => t('Clearing Action Type'),
+    '#title'       => t('Purge action'),
     '#default_value' => variable_get('akamai_action', ''),
     '#options'     => array(
       'remove'     => t('Remove'),
