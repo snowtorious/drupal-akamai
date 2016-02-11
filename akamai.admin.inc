@@ -248,7 +248,6 @@ function akamai_settings_form() {
 function akamai_settings_form_validate_credential_field(&$element, &$form_state, $form) {
   $storage_type = $element['#akamai_credential_type'];
   $is_required = ($form_state['values']['akamai_credential_storage'] == $storage_type);
-  $value = $form_state['values'][$element['#name']];
   $is_empty = (is_string($element['#value']) && drupal_strlen(trim($element['#value'])) == 0);
   if ($is_required && $is_empty) {
     form_error($element, t('!name field is required.', array('!name' => $element['#title'])));
