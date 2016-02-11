@@ -367,13 +367,9 @@ function akamai_manual_purge_form_submit($form, &$form_state) {
   // data won't be used in actual HTML, just API requests.
   $paths = explode("\n", $form_state['values']['paths']);
 
-  $overrides = array(
-    'action' => $form_state['values']['refresh'],
-    'domain' => $form_state['values']['domain_override']
-  );
-
-  if ($result = akamai_clear_url($paths, $overrides)) {
-    $message = t("Akamai Cache Request has been made successfully.") . theme("item_list", $paths);
+  if ($result = akamai_purge_paths($paths)) {
+    $paths['items'] = $paths;
+    $message = t("Akamai purge request successful. The estimated completion time is @estimated_seconds seconds and the list of URLs submitted are:", array('@estimated_seconds' => $result->estimatedSeconds)) . theme("item_list", $paths);
     $status = 'status';
 
     // @todo Overhaul the $akamai_response_data logic, it is currently expecting
