@@ -376,6 +376,8 @@ function akamai_manual_purge_form_submit($form, &$form_state) {
     $message = t("Akamai Cache Request has been made successfully.") . theme("item_list", $paths);
     $status = 'status';
 
+    // @todo Overhaul the $akamai_response_data logic, it is currently expecting
+    // v2 response and doesn't report correct information.
     if (is_object($result) && !empty($result->data)) {
       if ($akamai_response_data = json_decode($result->data)) {
         if (isset($akamai_response_data->httpStatus) && $akamai_response_data->httpStatus > 300) {
