@@ -1,5 +1,5 @@
 name = Akamai
-description = Cache Control integration with Akamai CDN, Akamai is a registered trademark of Akamai Technologies, Inc.
+description = Content Control Utility (CCU) integration with the Akamai CDN for making purge requests.
 core = 7.x
 dependencies[] = composer_manager
 recommends[] = expire

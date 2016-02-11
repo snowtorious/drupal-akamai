@@ -10,20 +10,20 @@ use Akamai\Open\EdgeGrid\Client as EdgeGridClient;
 use Drupal\akamai\CcuClientInterface;
 
 /**
- * General Settings for Akamai
+ * Form builder to manage Akamai settings.
  */
-function akamai_settings() {
+function akamai_settings_form() {
   $form = array();
 
   $form['disable_fieldset'] = array(
     '#type' => 'fieldset',
     '#title' => t('Disable akamai cache clearing'),
-    '#description' => t('Set this field to temporarity purge request submissions. Purge requests will still be queued if queueing is enabled. This can be useful when performing imports, migrations, or other batch processes.'),
+    '#description' => t('Set this field to disable purge request submissions. Purge requests will still be queued if queueing is enabled. This can be useful when performing imports, migrations, or other batch processes.'),
   );
 
   $form['disable_fieldset']['akamai_disabled'] = array(
     '#type'          => 'checkbox',
-    '#title'         => t('Disable cache clearing'),
+    '#title'         => t('Disable cache purging'),
     '#default_value' => variable_get('akamai_disabled', FALSE),
   );
 
@@ -133,11 +133,11 @@ function akamai_settings() {
     '#type'          => 'textfield',
     '#title'         => t('Base URL'),
     '#default_value' => variable_get('akamai_base_uri', ''),
-    '#description'   => t('Should be in for format of %uri', array('%uri' => 'https://akaa-xxxxxxxxxxxxxxxx-xxxxxxxxxxxxxxxx.luna.akamaiapis.net/')),
+    '#description'   => t('Should be in format of %url', array('%url' => 'https://akaa-xxxxxxxxxxxxxxxx-xxxxxxxxxxxxxxxx.luna.akamaiapis.net/')),
     '#states' => $database_field_states,
     '#element_validate' => array(
-      'akamai_settings_validate_credential_field',
-      'akamai_settings_validate_url',
+      'akamai_settings_form_validate_credential_field',
+      'akamai_settings_form_validate_url',
     ),
     '#akamai_credential_type' => 'database',
   );
@@ -145,18 +145,18 @@ function akamai_settings() {
     '#type'          => 'textfield',
     '#title'         => t('Access token'),
     '#default_value' => variable_get('akamai_access_token', ''),
-    '#description'   => t('Should be in for format of %token', array('%token' => 'akab-xxxxxxxxxxxxxxxx-xxxxxxxxxxxxxxxx')),
+    '#description'   => t('Should be in format of %token', array('%token' => 'akab-xxxxxxxxxxxxxxxx-xxxxxxxxxxxxxxxx')),
     '#states' => $database_field_states,
-    '#element_validate' => array('akamai_settings_validate_credential_field'),
+    '#element_validate' => array('akamai_settings_form_validate_credential_field'),
     '#akamai_credential_type' => 'database',
   );
   $form['credentials']['akamai_client_token'] = array(
     '#type'          => 'textfield',
     '#title'         => t('Client token'),
     '#default_value' => variable_get('akamai_client_token', ''),
-    '#description'   => t('Should be in for format of %token', array('%token' => 'akab-xxxxxxxxxxxxxxxx-xxxxxxxxxxxxxxxx')),
+    '#description'   => t('Should be in format of %token', array('%token' => 'akab-xxxxxxxxxxxxxxxx-xxxxxxxxxxxxxxxx')),
     '#states' => $database_field_states,
-    '#element_validate' => array('akamai_settings_validate_credential_field'),
+    '#element_validate' => array('akamai_settings_form_validate_credential_field'),
     '#akamai_credential_type' => 'database',
   );
   $form['credentials']['akamai_client_secret'] = array(
@@ -164,7 +164,7 @@ function akamai_settings() {
     '#title'         => t('Client secret'),
     '#default_value' => variable_get('akamai_client_secret', ''),
     '#states' => $database_field_states,
-    '#element_validate' => array('akamai_settings_validate_credential_field'),
+    '#element_validate' => array('akamai_settings_form_validate_credential_field'),
     '#akamai_credential_type' => 'database',
   );
   $form['credentials']['akamai_edgerc_path'] = array(
@@ -173,9 +173,9 @@ function akamai_settings() {
     '#default_value' => variable_get('akamai_edgerc_path', ''),
     '#states' => $file_field_states,
     '#element_validate' => array(
-      'akamai_settings_validate_credential_field',
-      'akamai_settings_validate_file_exists',
-      'akamai_settings_validate_file_is_readable',
+      'akamai_settings_form_validate_credential_field',
+      'akamai_settings_form_validate_file_exists',
+      'akamai_settings_form_validate_file_is_readable',
     ),
     '#akamai_credential_type' => 'file',
   );
@@ -184,7 +184,7 @@ function akamai_settings() {
     '#title'         => t('Section of .edgerc file to use for the CCU API'),
     '#default_value' => variable_get('akamai_edgerc_section', 'default'),
     '#states' => $file_field_states,
-    '#element_validate' => array('akamai_settings_validate_credential_field'),
+    '#element_validate' => array('akamai_settings_form_validate_credential_field'),
     '#akamai_credential_type' => 'file',
   );
 
@@ -208,7 +208,7 @@ function akamai_settings() {
   $form['akamai_timeout'] = array(
     '#type'          => 'textfield',
     '#title'         => t('Timeout length'),
-    '#description'   => t("The timeout used by when sending the cache clear request to Akamai's servers. Most users will not need to change this value."),
+    '#description'   => t("The timeout used by when sending the cache purge request to Akamai's servers. Most users will not need to change this value."),
     '#size'          => 5,
     '#maxlength'     => 3,
     '#default_value' => variable_get('akamai_timeout', EdgeGridClient::DEFAULT_REQUEST_TIMEOUT),
@@ -223,19 +223,19 @@ function akamai_settings() {
       CcuClientInterface::NETWORK_STAGING    => t('Staging'),
       CcuClientInterface::NETWORK_PRODUCTION => t('Production'),
     ),
-    '#description'   => t('The Akamai network to use for cache clearing.'),
+    '#description'   => t('The Akamai network to use for cache purge requests.'),
     '#required'      => TRUE,
   );
 
   $form['akamai_action'] = array(
     '#type'          => 'radios',
-    '#title'         => t('Clearing action type default'),
+    '#title'         => t('Purge action'),
     '#default_value' => variable_get('akamai_action', 'invalidate'),
     '#options'       => array(
       'remove'     => t('Remove'),
       'invalidate' => t('Invalidate'),
     ),
-    '#description'   => t('The default clearing action.  The options are <em>remove</em> (which removes the item from the Akamai cache) and <em>invalidate</em> (which leaves the item in the cache, but invalidates it so that the origin will be hit on the next request)'),
+    '#description'   => t('The default purging action. The options are <em>remove</em> (which removes the item from the Akamai cache) and <em>invalidate</em> (which leaves the item in the cache, but invalidates it so that the origin will be hit on the next request.)'),
     '#required'      => TRUE,
   );
 
@@ -245,10 +245,9 @@ function akamai_settings() {
 /**
  * Sets an error if required credential fields are not filled in.
  */
-function akamai_settings_validate_credential_field(&$element, &$form_state, $form) {
+function akamai_settings_form_validate_credential_field(&$element, &$form_state, $form) {
   $storage_type = $element['#akamai_credential_type'];
   $is_required = ($form_state['values']['akamai_credential_storage'] == $storage_type);
-  $value = $form_state['values'][$element['#name']];
   $is_empty = (is_string($element['#value']) && drupal_strlen(trim($element['#value'])) == 0);
   if ($is_required && $is_empty) {
     form_error($element, t('!name field is required.', array('!name' => $element['#title'])));
@@ -262,7 +261,7 @@ function akamai_settings_validate_credential_field(&$element, &$form_state, $for
 /**
  * Sets an error if the form element's value is not a valid absolute URL.
  */
-function akamai_settings_validate_url($element, &$form_state, $form) {
+function akamai_settings_form_validate_url($element, &$form_state, $form) {
   $url = $form_state['values'][$element['#name']];
   if (!empty($url) && !valid_url($element['#value'], TRUE)) {
     form_error($element, t('The !name field must be a valid, absolute URL.', array('!name' => $element['#title'])));
@@ -272,7 +271,7 @@ function akamai_settings_validate_url($element, &$form_state, $form) {
 /**
  * Sets an error if the form element's value is not a path to an existing file.
  */
-function akamai_settings_validate_file_exists($element, &$form_state, $form) {
+function akamai_settings_form_validate_file_exists($element, &$form_state, $form) {
   $path = $form_state['values'][$element['#name']];
   if (!empty($path) && !file_exists($path)) {
     form_error($element, t('Could not find the .edgerc file at %path. Please verify that it exists.', array('%path' => $path)));
@@ -282,7 +281,7 @@ function akamai_settings_validate_file_exists($element, &$form_state, $form) {
 /**
  * Sets an error if the form element's value is not a path to a readable file.
  */
-function akamai_settings_validate_file_is_readable($element, &$form_state, $form) {
+function akamai_settings_form_validate_file_is_readable($element, &$form_state, $form) {
   $path = $form_state['values'][$element['#name']];
   if (!empty($path) && !is_readable($path)) {
     form_error($element, t('Could not read the file at %path. Please verify that it is readable.', array('%path' => $path)));
@@ -290,22 +289,22 @@ function akamai_settings_validate_file_is_readable($element, &$form_state, $form
 }
 
 /**
- * Validate the akamai_settings form.
+ * Form Validation handler for akamai_settings_form().
  */
-function akamai_settings_validate(&$form, &$form_state) {
+function akamai_settings_form_validate(&$form, &$form_state) {
   // Validate .edgerc file.
   if ($form_state['values']['akamai_credential_storage'] == 'file') {
     $section = $form_state['values']['akamai_edgerc_section'];
     $path = $form_state['values']['akamai_edgerc_path'];
     try {
-      $edgegrid_client = EdgeGridClient::createFromEdgeRcFile($section, $path);
+      EdgeGridClient::createFromEdgeRcFile($section, $path);
     }
     catch (Exception $e) {
       form_set_error('akamai_edgerc_section', t('Could not validate .edgerc file. Exception: %message', array('%message' => $e->getMessage())));
     }
   }
 
-  // check if timeout value is an integer
+  // Check if timeout value is an integer.
   $filtered_akamai_timeout = filter_var(
     $form_state['values']['akamai_timeout'],
     FILTER_VALIDATE_INT,
@@ -316,31 +315,33 @@ function akamai_settings_validate(&$form, &$form_state) {
 }
 
 /**
- * General cache clearing page.
+ * Form builder for manually purging Akamai.
+ *
+ * @see akamai_manual_purge_form_submit().
  */
-function akamai_cache_control() {
+function akamai_manual_purge_form() {
   $form = array();
 
   $form['paths'] = array(
     '#type'        => 'textarea',
     '#title'       => t('Paths/URLs'),
-    '#description' => t('Enter one URL per line. URL entries should be relative to the basepath. (e.g. node/1, content/pretty-title, sites/default/files/some/image.png'),
+    '#description' => t('Enter one URL per line. Wildcards are not currently supported by v2 or v3 of the CCU REST API. URL entries should be relative to the basepath. (e.g. node/1, content/pretty-title, sites/default/files/some/image.png)'),
   );
 
   $form['domain_override'] = array(
     '#type'          => 'select',
-    '#title'         => t('Domain'),
+    '#title'         => t('Network'),
     '#default_value' => variable_get('akamai_network', CcuClientInterface::NETWORK_PRODUCTION),
     '#options'       => array(
       CcuClientInterface::NETWORK_STAGING    => t('Staging'),
       CcuClientInterface::NETWORK_PRODUCTION => t('Production'),
     ),
-    '#description'   => t('The Akamai domain to use for cache clearing.  Defaults to the Domain setting from the settings page.')
+    '#description'   => t('The Akamai network to use for cache purging. Defaults to the Domain setting from the settings page.')
   );
 
-  $form['refresh'] = array(
+  $form['purge_action'] = array(
     '#type'        => 'radios',
-    '#title'       => t('Clearing Action Type'),
+    '#title'       => t('Purge action'),
     '#default_value' => variable_get('akamai_action', ''),
     '#options'     => array(
       'remove'     => t('Remove'),
@@ -351,24 +352,20 @@ function akamai_cache_control() {
 
   $form['submit'] = array(
     '#type'  => 'submit',
-    '#value' => t('Start Refreshing Content'),
+    '#value' => t('Start Purging Content'),
   );
 
   return $form;
 }
 
-
 /**
- * Submit handler for akamai_cache_control().
- *
- * Process the settings and submit to Akamai
+ * Form submission handler for akamai_manual_purge_form().
  */
-function akamai_cache_control_submit($form, &$form_state) {
+function akamai_manual_purge_form_submit($form, &$form_state) {
   // filter_xss() does not need to be used here as it turns the & symbol into
-  // an HTML entity and v3 rejects it. We don't need HTML entites here as this
+  // an HTML entity and v3 rejects it. We don't need HTML entities here as this
   // data won't be used in actual HTML, just API requests.
   $paths = explode("\n", $form_state['values']['paths']);
-  $action = $form_state['values']['refresh'];
 
   $overrides = array(
     'action' => $form_state['values']['refresh'],
@@ -379,20 +376,22 @@ function akamai_cache_control_submit($form, &$form_state) {
     $message = t("Akamai Cache Request has been made successfully.") . theme("item_list", $paths);
     $status = 'status';
 
+    // @todo Overhaul the $akamai_response_data logic, it is currently expecting
+    // v2 response and doesn't report correct information.
     if (is_object($result) && !empty($result->data)) {
       if ($akamai_response_data = json_decode($result->data)) {
         if (isset($akamai_response_data->httpStatus) && $akamai_response_data->httpStatus > 300) {
-          $message = t("There was a problem with your cache clearing request.  The error message returned was '@msg'",
+          $message = t("There was a problem with your purge request. The error message returned was '@msg'",
             array('@msg' => $akamai_response_data->details));
           $status = 'error';
         }
         else {
-          $message = t("Akamai Cache Request has been made successfully.  Akamai reports an estimated time to completion of @time",
+          $message = t("Purge request successful. Akamai reports an estimated time to completion of @time",
             array('@time' => format_interval($akamai_response_data->estimatedSeconds))) . theme("item_list", $paths);
         }
       }
       else {
-        $message = t('There was a problem with your cache clearing request. Please check the watchdog logs for details.');
+        $message = t('There was a problem with your purge request. Please check the watchdog logs for details.');
         $status = 'error';
 
         watchdog('akamai', 'Unable to parse Akamai API response data: @json_data',
@@ -401,7 +400,7 @@ function akamai_cache_control_submit($form, &$form_state) {
     }
   }
   else {
-    $message = t('There was a problem with your cache clearing request. Please check the watchdog logs for details.');
+    $message = t('There was a problem with your purge request. Please check the watchdog logs for details.');
     $status = 'error';
   }
 
