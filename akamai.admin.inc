@@ -297,7 +297,7 @@ function akamai_settings_form_validate(&$form, &$form_state) {
     $section = $form_state['values']['akamai_edgerc_section'];
     $path = $form_state['values']['akamai_edgerc_path'];
     try {
-      $edgegrid_client = EdgeGridClient::createFromEdgeRcFile($section, $path);
+      EdgeGridClient::createFromEdgeRcFile($section, $path);
     }
     catch (Exception $e) {
       form_set_error('akamai_edgerc_section', t('Could not validate .edgerc file. Exception: %message', array('%message' => $e->getMessage())));
