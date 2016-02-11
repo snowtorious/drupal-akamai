@@ -2,28 +2,21 @@
 
 /**
  * @file
- * Constains the Drupal\akamai\Ccu3Client class.
+ * Contains the Drupal\akamai\Ccu3Client class.
  *
  * This class is used for interacting with v3 of Akamai's CCU API.
  */
 
 namespace Drupal\akamai;
 
-use Akamai\Open\EdgeGrid\Client as EdgeGridClient;
-
 class Ccu3Client extends BaseCcuClient implements CcuClientInterface {
-
-  /**
-   * The CCU API version.
-   */
-  const API_VERSION = 3;
 
   /**
    * The version of the CCU API.
    *
    * @var string
    */
-  protected $version = 'v' . self::API_VERSION;
+  protected $version = 'v3';
 
   /**
    * Implements CcuClientInterface::getPurgeApiEndpoint().
