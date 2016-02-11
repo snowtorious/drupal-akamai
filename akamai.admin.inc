@@ -18,7 +18,7 @@ function akamai_settings_form() {
   $form['disable_fieldset'] = array(
     '#type' => 'fieldset',
     '#title' => t('Disable akamai cache clearing'),
-    '#description' => t('Set this field to temporarity purge request submissions. Purge requests will still be queued if queueing is enabled. This can be useful when performing imports, migrations, or other batch processes.'),
+    '#description' => t('Set this field to disable purge request submissions. Purge requests will still be queued if queueing is enabled. This can be useful when performing imports, migrations, or other batch processes.'),
   );
 
   $form['disable_fieldset']['akamai_disabled'] = array(
