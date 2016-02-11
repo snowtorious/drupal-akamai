@@ -373,7 +373,10 @@ function akamai_get_purge_paths($path, array $options) {
   $context['original_path'] = $path;
   drupal_alter('akamai_paths', $paths, $context);
 
-  return array_unique($paths);
+  // Remove duplicates.
+  $paths = array_unique($paths);
+
+  return $paths;
 }
 
 /**
