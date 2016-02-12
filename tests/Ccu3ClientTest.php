@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Unit tests for the Drupal\akamai\Ccu3Client class.
+ */
+
 namespace Drupal\akamai\Tests;
 
 use Akamai\Open\EdgeGrid\Client;
@@ -9,6 +14,8 @@ use Drupal\akamai\Ccu3Client;
 class ClientTest extends \PHPUnit_Framework_TestCase {
 
   /**
+   * Tests the checkProgress method.
+   *
    * @covers Drupal\akamai\Ccu3Client::checkProgress
    */
   public function testCheckProgress() {
@@ -56,6 +63,8 @@ class ClientTest extends \PHPUnit_Framework_TestCase {
   }
 
   /**
+   * Tests the postPurgeRequest method.
+   *
    * @covers Drupal\akamai\Ccu3Client::postPurgeRequest
    */
   public function testPostPurgeRequest() {
@@ -124,6 +133,8 @@ class ClientTest extends \PHPUnit_Framework_TestCase {
   }
 
   /**
+   * Tests the bodyIsBelowLimit method.
+   *
    * @covers Drupal\akamai\Ccu3Client::bodyIsBelowLimit
    */
   public function testBodyIsBelowLimit() {

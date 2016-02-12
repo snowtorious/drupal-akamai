@@ -48,6 +48,7 @@ interface CcuClientInterface {
    * Sets the operation to use when issuing a purge request.
    *
    * @param string $operation
+   *   An operation such as 'invalidate' or 'remove'.
    */
   public function setOperation($operation);
 
@@ -55,7 +56,7 @@ interface CcuClientInterface {
    * Checks the progress of a purge request.
    *
    * @param string $progress_uri
-   *  A URI as provided in response to a purge request.
+   *   A URI as provided in response to a purge request.
    */
   public function checkProgress($progress_uri);
 
@@ -73,6 +74,8 @@ interface CcuClientInterface {
    * Generates the URL to use when posting a purge request.
    *
    * @return string
+   *   The URL to use for creating a purge request,
+   *   e.g. '/ccu/v3/invalidate/url/production'.
    */
   public function getPurgeApiEndpoint();
 
@@ -80,6 +83,7 @@ interface CcuClientInterface {
    * Generates a JSON-encoded body for a purge request.
    *
    * @return string
+   *   A JSON-encoded object containing 'hostname' and 'objects' properties.
    */
   public function getPurgeBody($hostname, array $paths);
 
@@ -90,6 +94,7 @@ interface CcuClientInterface {
    *   The name of the URL that contains the objects you want to purge.
    * @param array $paths
    *   An array of paths to be purged.
+   *
    * @return bool
    *   TRUE if the body size is below the limit, otherwise FALSE.
    */

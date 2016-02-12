@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Constains the Drupal\akamai\Ccu2Client class.
+ * Contains the Drupal\akamai\Ccu2Client class.
  *
  * This class is used for interacting with v2 of Akamai's CCU API.
  */

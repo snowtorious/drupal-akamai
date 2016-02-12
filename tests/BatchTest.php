@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Unit tests for the Drupal\akamai\Batch class.
+ */
+
 namespace Drupal\akamai\Tests;
 
 use Drupal\akamai\Batch;
@@ -7,6 +12,8 @@ use Drupal\akamai\Batch;
 class BatchTest extends \PHPUnit_Framework_TestCase {
 
   /**
+   * Tests that items are added to a batch correctly.
+   *
    * @covers Drupal\akamai\Batch::addItem
    */
   public function testAddItem() {
@@ -33,6 +40,10 @@ class BatchTest extends \PHPUnit_Framework_TestCase {
   }
 
   /**
+   * Verifies that an InvalidArgumentException is thrown when expected.
+   *
+   * An exception should be thrown when adding items with differing hostnames.
+   *
    * @covers Drupal\akamai\Batch::addItem
    */
   public function testAddItemException() {

@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Unit tests for the Drupal\akamai\Batcher class.
+ */
+
 namespace Drupal\akamai\Tests;
 
 use Akamai\Open\EdgeGrid\Client;
@@ -10,6 +15,8 @@ use Drupal\akamai\Batcher;
 class BatcherTest extends \PHPUnit_Framework_TestCase {
 
   /**
+   * Tests basic batching functionality.
+   *
    * @covers Drupal\akamai\Batcher::getBatch
    */
   public function testGetBatch() {

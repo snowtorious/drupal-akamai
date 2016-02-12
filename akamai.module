@@ -61,8 +61,7 @@ function akamai_menu() {
 
   $items['admin/config/system/akamai/purge'] = array(
     'title' => 'Manual Purge (CCU)',
-    'description' => 'Admin interface to manually purge URLs from Akamai via
-      the Content Control Utility (CCU) API.',
+    'description' => 'Admin interface to manually purge URLs from Akamai via the Content Control Utility (CCU) API.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('akamai_manual_purge_form'),
     'access arguments' => array('purge akamai cache'),
@@ -91,7 +90,7 @@ function akamai_menu() {
 }
 
 /**
- * Implements hook_theme()
+ * Implements hook_theme().
  */
 function akamai_theme() {
   return array(
@@ -198,7 +197,7 @@ function akamai_page_cache_control_form() {
 
   $form['path'] = array(
     '#type'  => 'hidden',
-    '#value' => $path
+    '#value' => $path,
   );
   $form['message'] = array(
     '#type'  => 'item',
@@ -262,7 +261,7 @@ function akamai_page_cache_control_form_submit($form, &$form_state) {
  * @see akamai_get_purge_paths()
  *
  * @return mixed
- *   A response object if the purge request was submitted sucessfully.
+ *   A response object if the purge request was submitted successfully.
  *   FALSE if purge request submission or queing failed.
  *   TRUE if the request was queued.
  */
@@ -298,7 +297,7 @@ function akamai_purge_path($path, array $options = array()) {
  *   hostname will be obtained from the akamai_get_hostname() function.
  *
  * @return mixed
- *   A response object if the purge request was submitted sucessfully.
+ *   A response object if the purge request was submitted successfully.
  *   FALSE if purge request submission or queing failed.
  *   TRUE if the request was queued.
  */

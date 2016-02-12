@@ -2,8 +2,7 @@
 
 /**
  * @file
- *   Akamai is a registered trademark of Akamai Technologies, Inc.
- *   Administrative pages for the Akamai module.
+ * Administrative pages for the Akamai module.
  */
 
 use Akamai\Open\EdgeGrid\Client as EdgeGridClient;
@@ -87,7 +86,7 @@ function akamai_settings_form() {
     '#type' => 'fieldset',
     '#collapsible' => TRUE,
     '#title' => t('API Credentials'),
-    '#description' => t('Instructions for obtaining credentials are available at !url.', array('!url' => l('https://developer.akamai.com/introduction/Prov_Creds.html', 'https://developer.akamai.com/introduction/Prov_Creds.html'))),
+    '#description' => t("For instructions on obtaining credentials, see Akamai's <a href=\"!url\">Authorize Your Client</a> documentation.", array('!url' => 'https://developer.akamai.com/introduction/Prov_Creds.html')),
   );
   $form['credentials']['akamai_credential_storage'] = array(
     '#type'          => 'radios',
@@ -98,7 +97,7 @@ function akamai_settings_form() {
       'file'     => t('.edgerc file'),
     ),
     '#required'      => TRUE,
-    '#description' => t('Credentials may be stored in the database or in a file. See the README file for more information.')
+    '#description' => t('Credentials may be stored in the database or in a file. See the README file for more information.'),
   );
 
   $database_field_states = array(
@@ -317,7 +316,7 @@ function akamai_settings_form_validate(&$form, &$form_state) {
 /**
  * Form builder for manually purging Akamai.
  *
- * @see akamai_manual_purge_form_submit().
+ * @see akamai_manual_purge_form_submit()
  */
 function akamai_manual_purge_form() {
   $form = array();
@@ -336,7 +335,7 @@ function akamai_manual_purge_form() {
       CcuClientInterface::NETWORK_STAGING    => t('Staging'),
       CcuClientInterface::NETWORK_PRODUCTION => t('Production'),
     ),
-    '#description'   => t('The Akamai network to use for cache purging. Defaults to the Domain setting from the settings page.')
+    '#description'   => t('The Akamai network to use for cache purging. Defaults to the Domain setting from the settings page.'),
   );
 
   $form['purge_action'] = array(
@@ -482,7 +481,7 @@ function akamai_purge_request_list() {
     '#theme' => 'table',
     '#header' => $header,
     '#rows' => $rows,
-    '#empty' => $empty,
+    '#empty' => t('No purge request data to display.'),
   ];
   $build['pager'] = ['#theme' => 'pager'];
   return $build;

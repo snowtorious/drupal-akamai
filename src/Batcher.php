@@ -36,6 +36,8 @@ class Batcher {
   protected $maxBatchSize = NULL;
 
   /**
+   * Constructor.
+   *
    * @param CcuClientInterface $client
    *   A CCU client object. Used to determine the maximum size of the batch
    *   based on the 50,000 byte limit of the purge request body.
