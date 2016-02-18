@@ -391,9 +391,15 @@ function akamai_get_purge_paths($path, array $options) {
 function akamai_get_hostname($language = NULL) {
   $language = empty($language) ? $GLOBALS['language_url'] : $language;
   if (variable_get('akamai_use_language_domain', FALSE) && !empty($language->domain)) {
-    return $language->domain;
+    $hostname = $language->domain;
   }
-  return variable_get('akamai_hostname', '');
+  else {
+    $hostname = variable_get('akamai_hostname', '');
+  }
+  $context = ['language' => $language];
+  drupal_alter('akamai_hostname', $hostname, $context);
+
+  return $hostname;
 }
 
 /**
