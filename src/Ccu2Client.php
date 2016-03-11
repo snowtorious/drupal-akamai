@@ -15,11 +15,6 @@ use InvalidArgumentException;
 class Ccu2Client extends BaseCcuClient implements CcuClientInterface {
 
   /**
-   * The CCU API version.
-   */
-  const API_VERSION = 2;
-
-  /**
    * The string used when removing objects.
    */
   const OPERATION_DELETE = 'remove';
@@ -29,7 +24,7 @@ class Ccu2Client extends BaseCcuClient implements CcuClientInterface {
    *
    * @var string
    */
-  protected $version = 'v' . self::API_VERSION;
+  protected $version = 'v2';
 
   /**
    * The queue to use when issuing a purge request.
