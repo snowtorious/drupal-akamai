@@ -252,8 +252,9 @@ function akamai_settings_form_validate_credential_field(&$element, &$form_state,
     form_error($element, t('!name field is required.', array('!name' => $element['#title'])));
   }
   elseif (!$is_required) {
-    // This storage method is not being used, so set value back to the default.
-    form_set_value($element, $element['#default_value'], $form_state);
+    // This storage method associated with this feild is not being used, so
+    // unset the value of this field.
+    form_set_value($element, NULL, $form_state);
   }
 }
 
